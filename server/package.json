@@ -1,0 +1,30 @@
+{
+  "name": "paperr-server",
+  "version": "1.0.0-beta",
+  "description": "paperr Express API",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "start": "node index.js",
+    "postinstall": "node scripts/setupLiteRT.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.7",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "node-cron": "^4.6.0",
+    "sharp": "^0.35.3",
+    "socket.io": "^4.6.2",
+    "tree-kill": "^1.2.2",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  }
+}

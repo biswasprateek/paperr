@@ -1,0 +1,30 @@
+{
+  "name": "paperr",
+  "version": "1.0.0-beta",
+  "description": "Self-hosted household OS — tasks, calendar, notes, and a local AI assistant, all LAN-only. This package clones the repo; see github.com/biswasprateek/paperr",
+  "bin": {
+    "paperr": "bin/paperr.js"
+  },
+  "files": [
+    "bin"
+  ],
+  "keywords": [
+    "self-hosted",
+    "household",
+    "family",
+    "tasks",
+    "calendar",
+    "notes",
+    "local-ai",
+    "lan"
+  ],
+  "homepage": "https://github.com/biswasprateek/paperr#readme",
+  "bugs": "https://github.com/biswasprateek/paperr/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/biswasprateek/paperr.git",
+    "directory": "npm"
+  },
+  "license": "Apache-2.0",
+  "author": "biswasprateek"
+}

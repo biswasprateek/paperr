@@ -1,0 +1,31 @@
+{
+  "_comment": "Curated Good Thoughts starter collections. Each top-level key is a collection: { label, category, icon, color, items: [ { body, attribution } ] }. See server/ai/curatedThoughts.js for how this file is consumed.",
+  "stoic_quotes": {
+    "label": "Stoic Quotes",
+    "category": "Quotes",
+    "icon": "🏛️",
+    "color": "#64748b",
+    "items": [
+      { "body": "You have power over your mind — not outside events. Realize this, and you will find strength.", "attribution": "Marcus Aurelius, Meditations" },
+      { "body": "It's not what happens to you, but how you react to it that matters.", "attribution": "Epictetus" },
+      { "body": "We suffer more often in imagination than in reality.", "attribution": "Seneca" },
+      { "body": "Waste no more time arguing about what a good man should be. Be one.", "attribution": "Marcus Aurelius, Meditations" },
+      { "body": "He who fears death will never do anything worthy of a man who is alive.", "attribution": "Seneca" },
+      { "body": "First say to yourself what you would be; and then do what you have to do.", "attribution": "Epictetus" },
+      { "body": "The obstacle in the path becomes the path. Never forget, within every obstacle is an opportunity to improve our condition.", "attribution": "Marcus Aurelius" },
+      { "body": "No man is free who is not master of himself.", "attribution": "Epictetus" },
+      { "body": "Difficulties strengthen the mind, as labor does the body.", "attribution": "Seneca" },
+      { "body": "How much more grievous are the consequences of anger than the causes of it.", "attribution": "Marcus Aurelius, Meditations" },
+      { "body": "Man is disturbed not by things, but by the views he takes of them.", "attribution": "Epictetus" },
+      { "body": "Every new beginning comes from some other beginning's end.", "attribution": "Seneca" },
+      { "body": "The happiness of your life depends upon the quality of your thoughts.", "attribution": "Marcus Aurelius, Meditations" },
+      { "body": "If you want to improve, be content to be thought foolish and stupid.", "attribution": "Epictetus" },
+      { "body": "Luck is what happens when preparation meets opportunity.", "attribution": "Seneca" },
+      { "body": "Confine yourself to the present.", "attribution": "Marcus Aurelius, Meditations" },
+      { "body": "Wealth consists not in having great possessions, but in having few wants.", "attribution": "Epictetus" },
+      { "body": "It is not the man who has too little, but the man who craves more, that is poor.", "attribution": "Seneca" },
+      { "body": "Dwell on the beauty of life. Watch the stars, and see yourself running with them.", "attribution": "Marcus Aurelius, Meditations" },
+      { "body": "Circumstances don't make the man, they only reveal him to himself.", "attribution": "Epictetus" }
+    ]
+  }
+}

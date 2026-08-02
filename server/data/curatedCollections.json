@@ -1,0 +1,124 @@
+{
+  "_comment": "Curated Frame starter collections. Each top-level key is a collection: { label, items: [ { title, artist, year, imageUrl } ] }. imageUrl must point directly at downloadable image bytes (jpg/png) — no HTML page, no auth wall. A key with an empty items array (or missing entirely) simply doesn't show up as a card. See server/ai/curatedArt.js for how this file is consumed.",
+  "impressionist-masters": {
+    "label": "The Met Collection",
+    "items": [
+      {
+        "title": "Gray Weather, Grande Jatte",
+        "artist": "Georges Seurat",
+        "year": "1886–88",
+        "imageUrl": "https://images.metmuseum.org/CRDImages/ep/original/DT1945.jpg"
+      },
+      {
+        "title": "The Gulf of Marseille Seen from L'Estaque",
+        "artist": "Paul Cézanne",
+        "year": "ca. 1885",
+        "imageUrl": "https://images.metmuseum.org/CRDImages/ep/original/DT1029.jpg"
+      },
+      {
+        "title": "First Steps, after Millet",
+        "artist": "Vincent van Gogh",
+        "year": "1890",
+        "imageUrl": "https://images.metmuseum.org/CRDImages/ep/original/DP124808.jpg"
+      },
+      {
+        "title": "The Pool at Jas de Bouffan",
+        "artist": "Paul Cézanne",
+        "year": "ca. 1885–86",
+        "imageUrl": "https://images.metmuseum.org/CRDImages/ep/original/DT1492.jpg"
+      },
+      {
+        "title": "Sunflowers",
+        "artist": "Vincent van Gogh",
+        "year": "1887",
+        "imageUrl": "https://images.metmuseum.org/CRDImages/ep/original/DP-41223-001.jpg"
+      },
+      {
+        "title": "Olive Trees",
+        "artist": "Vincent van Gogh",
+        "year": "1889",
+        "imageUrl": "https://images.metmuseum.org/CRDImages/ep/original/DT1946.jpg"
+      },
+      {
+        "title": "Roses",
+        "artist": "Vincent van Gogh",
+        "year": "1890",
+        "imageUrl": "https://images.metmuseum.org/CRDImages/ep/original/DP346475.jpg"
+      },
+      {
+        "title": "Shoes",
+        "artist": "Vincent van Gogh",
+        "year": "1888",
+        "imageUrl": "https://images.metmuseum.org/CRDImages/ep/original/DT1947.jpg"
+      },
+      {
+        "title": "Wheat Field with Cypresses",
+        "artist": "Vincent van Gogh",
+        "year": "1889",
+        "imageUrl": "https://images.metmuseum.org/CRDImages/ep/original/DP-42549-001.jpg"
+      },
+      {
+        "title": "Self-Portrait with a Straw Hat (obverse: The Potato Peeler)",
+        "artist": "Vincent van Gogh",
+        "year": "1887",
+        "imageUrl": "https://images.metmuseum.org/CRDImages/ep/original/DT1502_cropped2.jpg"
+      },
+      {
+        "title": "The Gardener",
+        "artist": "Georges Seurat",
+        "year": "1882–83",
+        "imageUrl": "https://images.metmuseum.org/CRDImages/ep/original/DT1499.jpg"
+      },
+      {
+        "title": "A Woman Seated beside a Vase of Flowers (Madame Paul Valpinçon?)",
+        "artist": "Edgar Degas",
+        "year": "1865",
+        "imageUrl": "https://images.metmuseum.org/CRDImages/ep/original/DP-25460-001.jpg"
+      },
+      {
+        "title": "Study for 'A Sunday on La Grande Jatte'",
+        "artist": "Georges Seurat",
+        "year": "1884",
+        "imageUrl": "https://images.metmuseum.org/CRDImages/ep/original/DP259921.jpg"
+      },
+      {
+        "title": "Bouquet of Flowers in a Vase",
+        "artist": "Vincent van Gogh",
+        "year": "1890",
+        "imageUrl": "https://images.metmuseum.org/CRDImages/ep/original/DT7098.jpg"
+      },
+      {
+        "title": "Irises",
+        "artist": "Vincent van Gogh",
+        "year": "1890",
+        "imageUrl": "https://images.metmuseum.org/CRDImages/ep/original/DP346474.jpg"
+      }
+    ]
+  },
+  "national-gallery-of-art": {
+    "label": "National Gallery of Art Collection",
+    "items": [
+      {"title":"Self-Portrait","artist":"Vincent van Gogh","year":"1889","imageUrl":"https://api.nga.gov/iiif/54ee6643-e0f9-4b92-a1d2-441e5108724d/full/full/0/default.jpg"},
+      {"title":"The Valley of the Seine, from the Hills of Giverny","artist":"Theodore Robinson","year":"1892","imageUrl":"https://api.nga.gov/iiif/31b66660-52db-433c-a969-033fb716c138/full/full/0/default.jpg"},
+      {"title":"Morning Haze","artist":"Claude Monet","year":"1888","imageUrl":"https://api.nga.gov/iiif/36bd94fc-291f-43cb-9fd4-7b391fe3f0e5/full/full/0/default.jpg"},
+      {"title":"Seascape at Port-en-Bessin, Normandy","artist":"Georges Seurat","year":"1888","imageUrl":"https://api.nga.gov/iiif/f395c5e5-6711-487e-8c1b-747c698d1ef9/full/full/0/default.jpg"},
+      {"title":"Banks of the Seine, Vétheuil","artist":"Claude Monet","year":"1880","imageUrl":"https://api.nga.gov/iiif/5dd2009f-7782-43d8-9892-be5733d8f43b/full/full/0/default.jpg"},
+      {"title":"Study for \"La Grande Jatte\"","artist":"Georges Seurat","year":"1884/1885","imageUrl":"https://api.nga.gov/iiif/a65a3648-e5a9-48a5-82c6-e002562a2baa/full/full/0/default.jpg"},
+      {"title":"Flower Beds in Holland","artist":"Vincent van Gogh","year":"c. 1883","imageUrl":"https://api.nga.gov/iiif/de9ed4a3-3aed-4e56-b4c0-8c64a6ca4cc5/full/full/0/default.jpg"},
+      {"title":"The Watering Can - Garden at Le Raincy","artist":"Georges Seurat","year":"c. 1883","imageUrl":"https://api.nga.gov/iiif/1f71e136-b73a-4b38-bc4f-b96d7c2b36fd/full/full/0/default.jpg"},
+      {"title":"Green Wheat Fields, Auvers","artist":"Vincent van Gogh","year":"1890","imageUrl":"https://api.nga.gov/iiif/b479275a-4f8a-4702-83c2-9dcc4cbe60ce/full/full/0/default.jpg"},
+      {"title":"Jerusalem Artichoke Flowers","artist":"Claude Monet","year":"1880","imageUrl":"https://api.nga.gov/iiif/5bfb4c45-feb8-4dbb-8b77-519c0560dcaf/full/full/0/default.jpg"},
+      {"title":"The Olive Orchard","artist":"Vincent van Gogh","year":"1889","imageUrl":"https://api.nga.gov/iiif/f07617e8-43ad-4954-8223-4b40dce37061/full/full/0/default.jpg"},
+      {"title":"Dahlias, Garden at Petit Gennevilliers","artist":"Gustave Caillebotte","year":"1893","imageUrl":"https://api.nga.gov/iiif/db9c0b9a-9e47-45a3-837f-554a8871710f/full/full/0/default.jpg"},
+      {"title":"The Willows","artist":"Claude Monet","year":"1880","imageUrl":"https://api.nga.gov/iiif/98e60cb0-0cd5-42ec-8e2f-373104b12e3f/full/full/0/default.jpg"},
+      {"title":"Still Life with Peonies","artist":"Paul Gauguin","year":"1884","imageUrl":"https://api.nga.gov/iiif/9f47ac4b-d7dd-4b0e-a9f5-3154a787e2fd/full/full/0/default.jpg"},
+      {"title":"A Summer Landscape","artist":"Georges Seurat","year":"1883","imageUrl":"https://api.nga.gov/iiif/dfabc057-5627-4b59-98be-68b17ab49087/full/full/0/default.jpg"},
+      {"title":"The Japanese Footbridge","artist":"Claude Monet","year":"1899","imageUrl":"https://api.nga.gov/iiif/0b9cefb5-1ee4-401a-8154-8d4039191a28/full/full/0/default.jpg"},
+      {"title":"Still Life of Oranges and Lemons with Blue Gloves","artist":"Vincent van Gogh","year":"1889","imageUrl":"https://api.nga.gov/iiif/b74be188-7a6a-4fc8-866e-55c4e11937c9/full/full/0/default.jpg"},
+      {"title":"Horse and Boats (Study for \"Bathers at Asnières\")","artist":"Georges Seurat","year":"1883/1884","imageUrl":"https://api.nga.gov/iiif/b9301087-6e10-447e-9454-daa81d189bd5/full/full/0/default.jpg"},
+      {"title":"The Artist's Garden in Argenteuil (A Corner of the Garden with Dahlias)","artist":"Claude Monet","year":"1873","imageUrl":"https://api.nga.gov/iiif/4196f97b-1edb-4fae-aa9f-882afe35978b/full/full/0/default.jpg"},
+      {"title":"Seascape (Gravelines)","artist":"Georges Seurat","year":"1890","imageUrl":"https://api.nga.gov/iiif/7c815a37-b831-46dd-9530-90d98a7b7d4c/full/full/0/default.jpg"},
+      {"title":"Farmhouse in Provence","artist":"Vincent van Gogh","year":"1888","imageUrl":"https://api.nga.gov/iiif/51c369a2-cc20-43f6-8262-25877c4377eb/full/full/0/default.jpg"}
+    ]
+  }
+}
