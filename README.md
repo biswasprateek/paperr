@@ -7,7 +7,7 @@
 
 ### Organize everything. Share nothing.
 
-**paperr** is a private, self-hosted operating system for your household or team — tasks, projects, calendar, notes, routines, focus tools, a shared wall dashboard, and a built-in AI assistant, all running on your own network. Nothing ever leaves your LAN.
+**paperr** is a private, self-hosted operating system for your household or team — tasks, projects, calendar, notes, routines, focus tools, a shared wall dashboard, and a built-in AI assistant & agents, all running on your own network. Nothing ever leaves your LAN.
 
 **100% free. Your data never leaves your network. A tiny but powerful AI that runs on your machine.**
 
