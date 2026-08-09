@@ -97,7 +97,7 @@ function CollectionEditor({ collection, onUpdate }) {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <span className="text-label-sm text-on-surface-variant uppercase tracking-wide">Name</span>
+        <span className="text-label-md text-on-surface-variant tracking-wide">Name</span>
         <input
           value={name}
           placeholder="Untitled collection"
@@ -127,7 +127,7 @@ function CollectionEditor({ collection, onUpdate }) {
       </div>
 
       <div>
-        <span className="text-label-sm text-on-surface-variant uppercase tracking-wide block mb-1">Category</span>
+        <span className="text-label-md text-on-surface-variant tracking-wide block mb-1">Category</span>
         <PillSelect
           value={collection.category}
           onChange={(v) => onUpdate({ category: v })}
@@ -136,12 +136,12 @@ function CollectionEditor({ collection, onUpdate }) {
       </div>
 
       <div>
-        <span className="text-label-sm text-on-surface-variant uppercase tracking-wide block mb-2">Visibility</span>
+        <span className="text-label-md text-on-surface-variant tracking-wide block mb-2">Visibility</span>
         <VisibilityToggle value={collection.visibility} onChange={(v) => onUpdate({ visibility: v })} />
       </div>
 
       <div>
-        <span className="text-label-sm text-on-surface-variant uppercase tracking-wide block mb-1.5">Time of Day</span>
+        <span className="text-label-md text-on-surface-variant tracking-wide block mb-1.5">Time of Day</span>
         <div className="flex flex-wrap gap-1.5">
           <TimeSlotPill label="Any time" emoji="🕐" active={!collection.time_slot} onClick={() => onUpdate({ time_slot: null })} />
           {TIME_SLOTS.map((s) => (
@@ -160,7 +160,7 @@ function CollectionEditor({ collection, onUpdate }) {
 
       <div>
         <div className="flex items-center justify-between mb-2">
-          <span className="text-label-sm text-on-surface-variant uppercase tracking-wide">Entries</span>
+          <span className="text-label-md text-on-surface-variant tracking-wide">Entries</span>
           {editingEntry === undefined && (
             <button onClick={() => setEditingEntry(null)} className="flex items-center gap-1.5 text-label-sm text-primary px-3 py-1.5 rounded-full hover:bg-primary/10">
               <span className="material-symbols-outlined text-[18px]">add</span>
@@ -315,7 +315,7 @@ export default function ManageModal({ onClose }) {
             <h3 className="text-body-lg font-bold text-on-surface mb-3">Playback</h3>
             <div className="flex flex-wrap gap-6">
               <div className="flex flex-col gap-1.5">
-                <span className="text-label-sm text-on-surface-variant uppercase tracking-wide">Seconds per thought</span>
+                <span className="text-label-md text-on-surface-variant tracking-wide">Seconds per thought</span>
                 <input
                   type="number"
                   min={5}
@@ -332,11 +332,11 @@ export default function ManageModal({ onClose }) {
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <span className="text-label-sm text-on-surface-variant uppercase tracking-wide">Shuffle all collections</span>
+                <span className="text-label-md text-on-surface-variant tracking-wide">Shuffle all collections</span>
                 <Toggle on={!!settings?.shuffle} onClick={() => updateSettings.mutate({ shuffle: settings?.shuffle ? 0 : 1 })} label="Shuffle all collections" />
               </div>
               <div className="flex flex-col gap-1.5">
-                <span className="text-label-sm text-on-surface-variant uppercase tracking-wide">Show attribution</span>
+                <span className="text-label-md text-on-surface-variant tracking-wide">Show attribution</span>
                 <Toggle on={(settings?.show_attribution ?? 1) === 1} onClick={() => updateSettings.mutate({ show_attribution: settings?.show_attribution ? 0 : 1 })} label="Show attribution" />
               </div>
             </div>

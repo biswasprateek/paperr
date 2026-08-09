@@ -204,7 +204,7 @@ export default function DayView({
         <div className="flex-1 min-h-0 flex flex-col bg-surface-container-lowest rounded-2xl border border-outline-variant/20 shadow-soft overflow-hidden">
           {allDay.length > 0 && (
             <div className="px-4 py-2 border-b border-outline-variant/20 shrink-0">
-              <p className="text-[10px] text-on-surface-variant mb-1 uppercase tracking-wide">All day</p>
+              <p className="text-[10px] text-on-surface-variant mb-1 tracking-wide">All day</p>
               <div className="flex flex-col gap-1">
                 {allDay.map(({ type, item, variant }, i) => (
                   <CalendarEventChip

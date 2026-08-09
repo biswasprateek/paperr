@@ -238,7 +238,7 @@ export default function Routines() {
           </div>
           <div>
             <SectionHeader icon="insights" label="Progress" />
-            <ProgressView protocols={protocols} progress={progress} isLoading={progressLoading} />
+            <ProgressView protocols={protocols} progress={progress} isLoading={progressLoading} onEditHabit={onEditHabit} />
           </div>
         </div>
       ) : view === 'arc' ? (
@@ -262,7 +262,7 @@ export default function Routines() {
           busyId={busyId}
         />
       ) : (
-        <ProgressView protocols={protocols} progress={progress} isLoading={progressLoading} />
+        <ProgressView protocols={protocols} progress={progress} isLoading={progressLoading} onEditHabit={onEditHabit} />
       )}
       </div>
 
@@ -286,6 +286,7 @@ export default function Routines() {
           onClose={() => setHabitModal(null)}
           onSave={(data) => saveHabit.mutate({ id: habitModal.habit?.id, data })}
           onDelete={(h) => deleteHabit.mutate(h.id)}
+          onArchive={(h) => saveHabit.mutate({ id: h.id, data: { is_active: h.is_active === 0 ? 1 : 0 } })}
           onCreateProtocol={createProtocolInline}
           loading={saveHabit.isPending}
         />

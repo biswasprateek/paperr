@@ -207,7 +207,7 @@ function ProjectCard({ project, onEdit, onArchive, onActivate, onDelete, onClick
 
         {/* Status + shared badge */}
         <div className="mt-3 flex items-center gap-2 flex-wrap">
-          <span className={`text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide ${STATUS_STYLES[project.status] || STATUS_STYLES.active}`}>
+          <span className={`text-xs font-bold px-2.5 py-1 rounded-full tracking-wide ${STATUS_STYLES[project.status] || STATUS_STYLES.active}`}>
             {project.status}
           </span>
           <SharedBadge visibility={project.visibility} />

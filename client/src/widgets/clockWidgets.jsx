@@ -214,7 +214,7 @@ export function ClockApp() {
       <FlipClock size="md" />
       <div className="w-full">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Alarms</span>
+          <span className="text-label-md font-bold text-on-surface-variant tracking-wider">Alarms</span>
           <button
             type="button"
             onClick={() => setEditing(null)}

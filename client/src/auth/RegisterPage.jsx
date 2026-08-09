@@ -248,7 +248,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-12 bg-primary text-on-primary rounded-full text-label-md font-bold uppercase tracking-widest hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2 mt-2"
+              className="w-full h-12 bg-primary text-on-primary rounded-full text-label-md font-bold tracking-widest hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2 mt-2"
             >
               {loading ? (
                 <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>

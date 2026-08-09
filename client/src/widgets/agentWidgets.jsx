@@ -129,7 +129,7 @@ export function AgentInsightsWidget({ editing, agent, agentName, agentIcon, onUp
     >
       {showPicker ? (
         <div>
-          <p className="text-label-sm uppercase tracking-widest text-on-surface-variant/60 font-bold px-1 pb-1.5">
+          <p className="text-label-md tracking-widest text-on-surface-variant/60 font-bold px-1 pb-1.5">
             Choose an agent
           </p>
           <div className="space-y-0.5">

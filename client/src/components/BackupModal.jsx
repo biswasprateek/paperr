@@ -117,7 +117,7 @@ export default function BackupModal({ onClose }) {
 
         {/* Manual backup */}
         <section className="space-y-3">
-          <p className="text-label-md text-on-surface-variant font-bold uppercase tracking-wider">Manual Backup</p>
+          <p className="text-label-md text-on-surface-variant font-bold tracking-wider">Manual Backup</p>
           <div className="flex items-center gap-3">
             <button
               onClick={() => createBackup.mutate()}
@@ -136,7 +136,7 @@ export default function BackupModal({ onClose }) {
         {/* Auto-backup settings */}
         <section className="space-y-4 pt-1 border-t border-outline-variant/20">
           <div className="flex items-center justify-between">
-            <p className="text-label-md text-on-surface-variant font-bold uppercase tracking-wider">Automatic Backups</p>
+            <p className="text-label-md text-on-surface-variant font-bold tracking-wider">Automatic Backups</p>
             <button
               onClick={() => updateSettings.mutate({ auto_enabled: !settings.auto_enabled })}
               aria-label="Automatic backups"
@@ -200,7 +200,7 @@ export default function BackupModal({ onClose }) {
 
         {/* Backup list */}
         <section className="space-y-3 pt-1 border-t border-outline-variant/20">
-          <p className="text-label-md text-on-surface-variant font-bold uppercase tracking-wider">Existing Backups</p>
+          <p className="text-label-md text-on-surface-variant font-bold tracking-wider">Existing Backups</p>
 
           {backups.length === 0 && (
             <p className="text-body-md text-on-surface-variant text-center py-4">No backups yet.</p>

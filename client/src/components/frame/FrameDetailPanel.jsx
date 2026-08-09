@@ -151,7 +151,7 @@ export default function FrameDetailPanel({ collection, onUpdateCollection }) {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <span className="text-label-sm text-on-surface-variant uppercase tracking-wide">Title — shown at the start of this collection's slideshow</span>
+        <span className="text-label-md text-on-surface-variant tracking-wide">Title — shown at the start of this collection's slideshow</span>
         <input
           type="text"
           value={name}
@@ -163,7 +163,7 @@ export default function FrameDetailPanel({ collection, onUpdateCollection }) {
 
       <div className="flex gap-3">
         <div className="flex-1">
-          <span className="text-label-sm text-on-surface-variant uppercase tracking-wide block mb-1">Type</span>
+          <span className="text-label-md text-on-surface-variant tracking-wide block mb-1">Type</span>
           <PillSelect
             value={collection.collection_type}
             onChange={(v) => onUpdateCollection({ collection_type: v })}
@@ -171,7 +171,7 @@ export default function FrameDetailPanel({ collection, onUpdateCollection }) {
           />
         </div>
         <div className="flex-1">
-          <span className="text-label-sm text-on-surface-variant uppercase tracking-wide block mb-1">Frame</span>
+          <span className="text-label-md text-on-surface-variant tracking-wide block mb-1">Frame</span>
           <PillSelect
             value={collection.frame_style}
             onChange={(v) => onUpdateCollection({ frame_style: v })}
@@ -189,7 +189,7 @@ export default function FrameDetailPanel({ collection, onUpdateCollection }) {
 
       <div>
         <div className="flex items-center justify-between mb-2">
-          <span className="text-label-sm text-on-surface-variant uppercase tracking-wide">Photos</span>
+          <span className="text-label-md text-on-surface-variant tracking-wide">Photos</span>
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={!!uploading}

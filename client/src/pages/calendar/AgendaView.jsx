@@ -80,7 +80,7 @@ export default function AgendaView({
                 onClick={() => onDayClick(key)}
                 className="w-14 shrink-0 flex flex-col items-center pt-0.5 hover:opacity-70 transition"
               >
-                <span className="text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">
+                <span className="text-[10px] font-bold tracking-wide text-on-surface-variant">
                   {format(d, 'EEE')}
                 </span>
                 <span className={`w-8 h-8 mt-0.5 flex items-center justify-center rounded-full text-sm font-semibold ${

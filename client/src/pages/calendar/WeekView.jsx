@@ -268,7 +268,7 @@ export default function WeekView({
               className={`py-2 text-center text-xs font-label-sm border-l border-outline-variant/20
                 ${isToday(d) ? 'text-primary font-medium' : 'text-on-surface-variant'}`}
             >
-              <div className="uppercase">{format(d, 'EEE')}</div>
+              <div>{format(d, 'EEE')}</div>
               <div className={`mx-auto w-7 h-7 flex items-center justify-center rounded-full mt-0.5
                 ${isToday(d) ? 'bg-primary text-on-primary' : ''}`}
               >
@@ -325,7 +325,7 @@ export default function WeekView({
                         style={{ height: LABEL_ROW_HEIGHT, gridColumn: '1 / -1' }}
                       >
                         <span className="text-[11px] leading-none">{slotMeta.emoji}</span>
-                        <span className="text-[10px] font-bold uppercase tracking-wide text-on-surface">{slotMeta.label}</span>
+                        <span className="text-[10px] font-bold tracking-wide text-on-surface">{slotMeta.label}</span>
                       </div>
                       <div className="relative z-20 bg-surface-container-low" style={{ height: DOTS_ROW_HEIGHT }} />
                       {days.map(d => {

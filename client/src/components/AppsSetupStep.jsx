@@ -239,7 +239,7 @@ export default function AppsSetupStep({ mode = 'initial', spaceId, onDone, doneL
 
       <button
         onClick={onDone}
-        className="w-full bg-primary text-on-primary rounded-full py-3 text-label-md font-bold uppercase tracking-wider hover:bg-primary/90 transition"
+        className="w-full bg-primary text-on-primary rounded-full py-3 text-label-md font-bold tracking-wider hover:bg-primary/90 transition"
       >
         {doneLabel}
       </button>

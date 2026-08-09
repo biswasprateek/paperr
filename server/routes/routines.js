@@ -339,20 +339,26 @@ router.delete('/habits/:id/complete', (req, res, next) => {
 
 // ── Progress (per-habit streaks + completion rate over last N days) ───────────────
 
+// ?archived=1 reports on archived habits instead of active ones. Archiving is
+// just is_active = 0 (via PATCH /habits/:id) — completions are never deleted,
+// so the streaks and history below read the same either way.
 router.get('/progress', (req, res, next) => {
   try {
     const db   = getDb();
     const days = Math.min(parseInt(req.query.days) || 30, 365);
     const today = todayStr();
+    const active = req.query.archived === '1' ? 0 : 1;
 
-    // All habits visible to the user in this space
+    // All habits visible to the user in this space. Selects the whole habit row
+    // (not just the display columns) so a progress row can be handed straight to
+    // the habit edit modal — that's how archived habits are reopened.
     const habits = db.prepare(`
-      SELECT h.id, h.title, h.icon, h.protocol_id, p.name AS protocol_name, p.color AS protocol_color
+      SELECT h.*, p.name AS protocol_name, p.color AS protocol_color
       FROM routines_habits h
       JOIN routines_protocols p ON h.protocol_id = p.id
-      WHERE p.space_id = ? AND (p.created_by = ? OR p.visibility = 'shared') AND h.is_active = 1
+      WHERE p.space_id = ? AND (p.created_by = ? OR p.visibility = 'shared') AND h.is_active = ?
       ORDER BY p.sort_order ASC, h.sort_order ASC
-    `).all(req.spaceId, req.user.id);
+    `).all(req.spaceId, req.user.id, active);
 
     const compStmt = db.prepare(`
       SELECT completed_date FROM routines_completions
@@ -397,8 +403,8 @@ router.get('/progress', (req, res, next) => {
       }
 
       return {
-        habit_id: h.id, title: h.title, icon: h.icon,
-        protocol_id: h.protocol_id, protocol_name: h.protocol_name, protocol_color: h.protocol_color,
+        ...h,
+        habit_id: h.id,
         current_streak: current, longest_streak: longest, completion_rate: rate, last7,
       };
     });

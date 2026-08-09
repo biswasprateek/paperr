@@ -79,7 +79,7 @@ export default function ProtocolFormModal({ protocol, onClose, onSave, onDelete,
         <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5">
           {/* Icon & colour */}
           <div>
-            <p className="text-label-sm text-on-surface-variant uppercase tracking-wider mb-2">Icon & Colour</p>
+            <p className="text-label-md text-on-surface-variant tracking-wider mb-2">Icon & Colour</p>
             <div className="flex items-center gap-4 flex-wrap">
               <EmojiPopover value={icon} onChange={setIcon} />
               <ColorSwatches value={color} onChange={setColor} />
@@ -90,7 +90,7 @@ export default function ProtocolFormModal({ protocol, onClose, onSave, onDelete,
 
           {/* Name */}
           <div>
-            <p className="text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Name *</p>
+            <p className="text-label-md text-on-surface-variant tracking-wider mb-1">Name *</p>
             <input
               autoFocus
               value={name}
@@ -103,7 +103,7 @@ export default function ProtocolFormModal({ protocol, onClose, onSave, onDelete,
 
           {/* Description */}
           <div>
-            <p className="text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Description</p>
+            <p className="text-label-md text-on-surface-variant tracking-wider mb-1">Description</p>
             <textarea
               value={description}
               onChange={e => setDesc(e.target.value)}
@@ -115,7 +115,7 @@ export default function ProtocolFormModal({ protocol, onClose, onSave, onDelete,
 
           {/* Visibility */}
           <div>
-            <p className="text-label-sm text-on-surface-variant uppercase tracking-wider mb-2">Visibility</p>
+            <p className="text-label-md text-on-surface-variant tracking-wider mb-2">Visibility</p>
             <div className="flex gap-2">
               {VISIBILITIES.map(v => (
                 <button

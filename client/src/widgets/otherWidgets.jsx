@@ -125,7 +125,7 @@ function WidgetTimeSlotSection({ slot, habits, onToggle, disabled, busyId }) {
     <div className="py-2 border-b border-outline-variant/10 last:border-0">
       <div className="flex items-center gap-1.5 mb-0.5">
         <span className="text-[13px] leading-none">{slot.emoji}</span>
-        <span className="text-label-sm uppercase tracking-wider text-on-surface-variant/70 font-bold">{slot.label}</span>
+        <span className="text-label-md tracking-wider text-on-surface-variant/70 font-bold">{slot.label}</span>
       </div>
       {habits.length === 0 ? (
         <p className="text-label-sm text-on-surface-variant/40 pl-5 py-1">Nothing scheduled</p>

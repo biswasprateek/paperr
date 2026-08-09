@@ -148,7 +148,7 @@ export default function SetupWizard({ onComplete }) {
 
               <button
                 onClick={() => setStep(1)}
-                className="w-full bg-primary text-on-primary rounded-full py-3 text-label-md font-bold uppercase tracking-wider hover:bg-primary/90 transition"
+                className="w-full bg-primary text-on-primary rounded-full py-3 text-label-md font-bold tracking-wider hover:bg-primary/90 transition"
               >
                 Continue
               </button>
@@ -265,7 +265,7 @@ export default function SetupWizard({ onComplete }) {
                 <button
                   onClick={handleSetup}
                   disabled={!adminDisplayName || !adminUsername || adminPassword.length < 8 || loading}
-                  className="flex-1 bg-primary text-on-primary rounded-full py-3 text-label-md font-bold uppercase tracking-wider hover:bg-primary/90 transition disabled:opacity-60 flex items-center justify-center gap-2"
+                  className="flex-1 bg-primary text-on-primary rounded-full py-3 text-label-md font-bold tracking-wider hover:bg-primary/90 transition disabled:opacity-60 flex items-center justify-center gap-2"
                 >
                   {loading && <span className="material-symbols-outlined animate-spin text-base">progress_activity</span>}
                   {loading ? 'Setting up...' : 'Finish Setup'}

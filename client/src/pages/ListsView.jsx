@@ -1425,7 +1425,7 @@ export default function ListsView() {
       {/* ── Sidebar ── */}
       <div className="w-56 flex-shrink-0 flex flex-col">
         <div className="mb-4">
-          <h2 className="text-label-md uppercase tracking-wider text-on-surface-variant font-bold">My Lists</h2>
+          <h2 className="text-label-md tracking-wider text-on-surface-variant font-bold">My Lists</h2>
         </div>
 
         <div className="space-y-0.5 flex-1 overflow-y-auto">

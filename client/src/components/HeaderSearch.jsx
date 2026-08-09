@@ -154,7 +154,7 @@ export default function HeaderSearch({ onOpenTask }) {
           ) : (
             groups.map(group => (
               <div key={group.label}>
-                <p className="text-label-sm uppercase tracking-widest text-on-surface-variant/60 font-bold px-4 pt-2 pb-1">
+                <p className="text-label-md tracking-widest text-on-surface-variant/60 font-bold px-4 pt-2 pb-1">
                   {group.label}
                 </p>
                 {group.items.map(item => {

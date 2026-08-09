@@ -129,7 +129,7 @@ export default function AiServerPanel() {
       {/* Models */}
       <section className="space-y-3 pt-1 border-t border-outline-variant/20">
         <div className="flex items-center justify-between">
-          <p className="text-label-md text-on-surface-variant font-bold uppercase tracking-wider">Models</p>
+          <p className="text-label-md text-on-surface-variant font-bold tracking-wider">Models</p>
           <div className="flex items-center gap-2">
             <button
               title="Open models folder"

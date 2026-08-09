@@ -119,7 +119,7 @@ export default function NotebookPanel({ selectedId, onSelect, createRequested, o
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-4 border-b border-outline-variant/20 flex-shrink-0">
-        <span className="text-label-md uppercase tracking-wider text-on-surface-variant font-bold">
+        <span className="text-label-md tracking-wider text-on-surface-variant font-bold">
           Notebooks
         </span>
         <button

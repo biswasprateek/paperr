@@ -597,7 +597,7 @@ function PhaseCard({ projectId, phase, phaseTasks, milestones, state, index, isL
 
         {/* Milestones */}
         <div className="mt-3 pt-3 border-t border-outline-variant/15">
-          <p className="text-label-sm text-on-surface-variant uppercase tracking-wide mb-1">Milestones</p>
+          <p className="text-label-md text-on-surface-variant tracking-wide mb-1">Milestones</p>
           {milestones.length === 0 && (
             <p className="text-label-sm text-on-surface-variant/50 py-1">No milestones yet</p>
           )}
@@ -742,7 +742,7 @@ function PeopleRail({ projectId, currentUserId }) {
 
   return (
     <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 shadow-soft overflow-hidden">
-      <p className="text-label-sm text-on-surface-variant uppercase tracking-wide px-4 pt-4 pb-2">People</p>
+      <p className="text-label-md text-on-surface-variant tracking-wide px-4 pt-4 pb-2">People</p>
       <div className="px-4 pb-3 space-y-2.5">
         {members.map(m => (
           <div key={m.user_id} className="flex items-center gap-2.5 group">
@@ -797,7 +797,7 @@ function ActivityRail({ projectId }) {
 
   return (
     <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 shadow-soft overflow-hidden">
-      <p className="text-label-sm text-on-surface-variant uppercase tracking-wide px-4 pt-4 pb-2">Activity</p>
+      <p className="text-label-md text-on-surface-variant tracking-wide px-4 pt-4 pb-2">Activity</p>
       <div className="px-4 pb-4 space-y-3 max-h-96 overflow-y-auto">
         {isLoading ? (
           <div className="flex justify-center py-4">
@@ -945,7 +945,7 @@ export default function ProjectDetail() {
               <p className="text-body-md text-on-surface-variant mt-1">{project.description}</p>
             )}
             <div className="flex items-center gap-3 mt-3 flex-wrap">
-              <span className={`text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide ${
+              <span className={`text-xs font-bold px-2.5 py-1 rounded-full tracking-wide ${
                 project.status === 'active'    ? 'bg-primary/10 text-primary' :
                 project.status === 'completed' ? 'bg-surface-variant text-on-surface-variant' :
                 'bg-surface-container text-on-surface-variant'
@@ -1067,7 +1067,7 @@ export default function ProjectDetail() {
           >
             <span className={`material-symbols-outlined text-2xl ${colour}`}>{icon}</span>
             <p className="text-headline-sm text-on-surface font-bold mt-1">{value}</p>
-            <p className="text-label-sm text-on-surface-variant uppercase tracking-wide mt-0.5">{label}</p>
+            <p className="text-label-md text-on-surface-variant tracking-wide mt-0.5">{label}</p>
           </div>
         ))}
       </div>

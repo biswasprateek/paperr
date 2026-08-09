@@ -358,7 +358,7 @@ export function SpaceRoutinesWidget({ editing }) {
                   <div key={slot.key} className="mb-2 last:mb-0">
                     <div className="flex items-center gap-1 mb-0.5">
                       <span className="text-[11px] leading-none">{slot.emoji}</span>
-                      <span className="text-[10px] uppercase tracking-wider text-on-surface-variant/70 font-bold">{slot.label}</span>
+                      <span className="text-[10px] tracking-wider text-on-surface-variant/70 font-bold">{slot.label}</span>
                     </div>
                     {bySlot[slot.key].map(h => (
                       <button

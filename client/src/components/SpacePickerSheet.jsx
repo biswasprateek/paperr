@@ -43,7 +43,7 @@ export default function SpacePickerSheet({
       </button>
 
       <BottomSheet open={open} onClose={() => setOpen(false)}>
-        <p className="text-label-sm uppercase tracking-widest text-on-surface-variant/60 font-bold px-5 pb-2">
+        <p className="text-label-md tracking-widest text-on-surface-variant/60 font-bold px-5 pb-2">
           Your Spaces
         </p>
         {spaces.map(space => (

@@ -123,7 +123,7 @@ export default function WidgetDrawer({ open, onClose, onAdd, boardType = 'home' 
             if (items.length === 0) return null;
             return (
               <div key={g}>
-                <p className="text-label-sm uppercase tracking-wider text-on-surface-variant/60 font-bold mb-2 px-0.5">
+                <p className="text-label-md tracking-wider text-on-surface-variant/60 font-bold mb-2 px-0.5">
                   {g}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">

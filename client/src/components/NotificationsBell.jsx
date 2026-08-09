@@ -80,7 +80,7 @@ export default function NotificationsBell() {
           {notifications.length > 0 && (
             <>
               <div className="flex items-center justify-between px-4 pt-4 pb-2">
-                <p className="text-label-sm uppercase tracking-widest text-on-surface-variant/60 font-bold">
+                <p className="text-label-md tracking-widest text-on-surface-variant/60 font-bold">
                   For You
                 </p>
                 {unreadNotifications.length > 0 && (
@@ -115,7 +115,7 @@ export default function NotificationsBell() {
               </div>
             </>
           )}
-          <p className="text-label-sm uppercase tracking-widest text-on-surface-variant/60 font-bold px-4 pt-4 pb-2">
+          <p className="text-label-md tracking-widest text-on-surface-variant/60 font-bold px-4 pt-4 pb-2">
             Recent Activity
           </p>
           {activity.length === 0 ? (

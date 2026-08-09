@@ -9,7 +9,7 @@ const EMOJI_BUTTON_CLASS =
 
 function FieldLabel({ children }) {
   return (
-    <p className="text-label-sm text-on-surface-variant uppercase tracking-wider mb-2">{children}</p>
+    <p className="text-label-md text-on-surface-variant tracking-wider mb-2">{children}</p>
   );
 }
 
@@ -47,7 +47,7 @@ const INPUT_CLASS =
 export default function HabitFormModal({
   open, onClose, habit = null, protocols = [],
   defaultTimeSlot = 'morning', defaultProtocolId = null,
-  onSave, onDelete, onCreateProtocol, loading,
+  onSave, onDelete, onArchive, onCreateProtocol, loading,
 }) {
   const [title, setTitle]           = useState('');
   const [icon, setIcon]             = useState('');
@@ -301,11 +301,26 @@ export default function HabitFormModal({
               <span className="material-symbols-outlined text-[18px]">delete</span>
             </button>
           )}
+          {habit && onArchive && (
+            <button
+              type="button"
+              onClick={() => onArchive(habit)}
+              title={habit.is_active === 0
+                ? 'Put this habit back in your routines'
+                : 'Hides the habit everywhere but keeps its streaks and history'}
+              className="h-12 px-4 rounded-full text-label-md text-on-surface-variant hover:bg-surface-container transition flex items-center gap-1.5"
+            >
+              <span className="material-symbols-outlined text-[18px]">
+                {habit.is_active === 0 ? 'unarchive' : 'archive'}
+              </span>
+              {habit.is_active === 0 ? 'Unarchive' : 'Archive'}
+            </button>
+          )}
           <div className="flex-1" />
           <button
             type="button"
             onClick={onClose}
-            className="px-5 h-12 rounded-full bg-surface-container-lowest border border-outline-variant/40 text-on-surface-variant text-label-md font-bold uppercase tracking-widest hover:bg-surface-container transition-[background-color,transform] duration-150 active:scale-[0.97]"
+            className="px-5 h-12 rounded-full bg-surface-container-lowest border border-outline-variant/40 text-on-surface-variant text-label-md font-bold tracking-widest hover:bg-surface-container transition-[background-color,transform] duration-150 active:scale-[0.97]"
           >
             Cancel
           </button>
@@ -313,7 +328,7 @@ export default function HabitFormModal({
             type="button"
             onClick={handleSubmit}
             disabled={!title.trim() || loading}
-            className="px-6 h-12 rounded-full bg-primary text-on-primary text-label-md font-bold uppercase tracking-widest hover:bg-primary/90 transition-[background-color,opacity,transform] duration-150 disabled:opacity-50 active:scale-[0.97] flex items-center justify-center gap-2"
+            className="px-6 h-12 rounded-full bg-primary text-on-primary text-label-md font-bold tracking-widest hover:bg-primary/90 transition-[background-color,opacity,transform] duration-150 disabled:opacity-50 active:scale-[0.97] flex items-center justify-center gap-2"
           >
             {loading && <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>}
             {habit ? 'Save' : 'Add Habit'}

@@ -32,7 +32,7 @@ export function renderMarkdown(text) {
         ? 'text-body-lg font-bold text-on-surface mt-2'
         : hashes.length === 2
           ? 'text-body-md font-bold text-on-surface mt-2'
-          : 'text-label-md font-bold uppercase tracking-wide text-on-surface-variant mt-2';
+          : 'text-label-md font-bold tracking-wide text-on-surface-variant mt-2';
       elements.push(<HeadingTag key={`h-${i}`} className={headingClass}>{renderInline(headingText)}</HeadingTag>);
       i++;
       continue;

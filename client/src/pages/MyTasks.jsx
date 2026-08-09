@@ -1563,7 +1563,7 @@ function DetailedRow({ task, onEdit, onToggleComplete, onCycleStatus, onCyclePri
 const SORTABLE_COLS = { priority: 'priority', status: 'status', due_date: 'due_date' };
 
 function DetailedView({ tasks, onEdit, onToggleComplete, onCycleStatus, onCyclePriority, onDeleteStart, deletingId, onDeleteConfirm, onDeleteCancel, isDeleting, selectionMode, selectedIds, onToggleSelect, hiddenCols, density, sortBy, onSort }) {
-  const th = 'py-3 pr-4 text-label-sm font-bold uppercase tracking-wider text-on-surface-variant/60';
+  const th = 'py-3 pr-4 text-label-md font-bold tracking-wider text-on-surface-variant/60';
 
   const SortableTh = ({ colKey, label }) => {
     const sortKey  = SORTABLE_COLS[colKey];
@@ -1574,7 +1574,7 @@ function DetailedView({ tasks, onEdit, onToggleComplete, onCycleStatus, onCycleP
         <button
           type="button"
           onClick={() => onSort(sortKey)}
-          className="flex items-center gap-1 uppercase tracking-wider hover:text-on-surface transition"
+          className="flex items-center gap-1 tracking-wider hover:text-on-surface transition"
           title={`Sort by ${label}`}
         >
           {label}
@@ -2190,7 +2190,7 @@ export default function Tasks() {
                       })}
                       className="flex items-center gap-2 w-full mb-2 group/grp"
                     >
-                      <span className={`text-label-sm uppercase tracking-widest font-bold flex-shrink-0 ${headerColour}`}>{group}</span>
+                      <span className={`text-label-md tracking-widest font-bold flex-shrink-0 ${headerColour}`}>{group}</span>
                       <span className="h-5 min-w-[20px] px-1.5 rounded-full bg-surface-container text-label-sm text-on-surface-variant flex items-center justify-center tabular-nums flex-shrink-0 tracking-normal">
                         {grouped[group].length}
                       </span>

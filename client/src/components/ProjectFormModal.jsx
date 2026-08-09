@@ -125,7 +125,7 @@ export default function ProjectFormModal({ project, onClose, onSave, loading }) 
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Icon & Colour */}
           <div>
-            <p className="text-label-sm text-on-surface-variant uppercase mb-2">Icon & Colour</p>
+            <p className="text-label-md text-on-surface-variant mb-2">Icon & Colour</p>
             <div className="flex items-center gap-4 flex-wrap">
               <EmojiPopover value={icon} onChange={setIcon} />
               <ColourSwatches value={colour} onChange={setColour} />
@@ -136,7 +136,7 @@ export default function ProjectFormModal({ project, onClose, onSave, loading }) 
 
           {/* Name */}
           <div>
-            <p className="text-label-sm text-on-surface-variant uppercase mb-1">Name *</p>
+            <p className="text-label-md text-on-surface-variant mb-1">Name *</p>
             <input
               autoFocus
               value={name}
@@ -149,7 +149,7 @@ export default function ProjectFormModal({ project, onClose, onSave, loading }) 
 
           {/* Description */}
           <div>
-            <p className="text-label-sm text-on-surface-variant uppercase mb-1">Description</p>
+            <p className="text-label-md text-on-surface-variant mb-1">Description</p>
             <textarea
               value={description}
               onChange={e => setDesc(e.target.value)}
@@ -162,7 +162,7 @@ export default function ProjectFormModal({ project, onClose, onSave, loading }) 
           {/* Dates */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <p className="text-label-sm text-on-surface-variant uppercase mb-1">Start Date</p>
+              <p className="text-label-md text-on-surface-variant mb-1">Start Date</p>
               <input
                 type="date"
                 value={startDate}
@@ -171,7 +171,7 @@ export default function ProjectFormModal({ project, onClose, onSave, loading }) 
               />
             </div>
             <div>
-              <p className="text-label-sm text-on-surface-variant uppercase mb-1">End Date</p>
+              <p className="text-label-md text-on-surface-variant mb-1">End Date</p>
               <input
                 type="date"
                 value={endDate}
@@ -183,7 +183,7 @@ export default function ProjectFormModal({ project, onClose, onSave, loading }) 
 
           {/* Visibility */}
           <div>
-            <p className="text-label-sm text-on-surface-variant uppercase mb-2">Visibility</p>
+            <p className="text-label-md text-on-surface-variant mb-2">Visibility</p>
             <VisibilityToggle value={visibility} onChange={setVisibility} />
           </div>
 

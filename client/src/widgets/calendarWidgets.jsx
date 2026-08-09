@@ -113,7 +113,7 @@ function WeekdayHeaderRow({ days }) {
   return (
     <div className="grid grid-cols-7 border-b border-outline-variant/15 pb-1 mb-1 shrink-0">
       {days.map((day, i) => (
-        <div key={i} className="text-[9px] font-bold text-on-surface-variant/60 uppercase text-center">
+        <div key={i} className="text-[9px] font-bold text-on-surface-variant/60 text-center">
           {WEEKDAY_LETTERS[day.getDay()]}
         </div>
       ))}

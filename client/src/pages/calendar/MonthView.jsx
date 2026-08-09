@@ -146,7 +146,7 @@ export default function MonthView({
         <div className="flex-1 min-h-0 flex flex-col bg-surface-container-lowest rounded-2xl border border-outline-variant/20 shadow-soft overflow-hidden">
         <div className="grid grid-cols-7 border-b border-outline-variant/20 shrink-0">
           {WEEKDAYS.map(d => (
-            <div key={d} className="py-2 text-center text-xs font-label-sm text-on-surface-variant uppercase tracking-wide">
+            <div key={d} className="py-2 text-center text-xs font-label-sm text-on-surface-variant tracking-wide">
               {d}
             </div>
           ))}

@@ -22,7 +22,7 @@ export default function UpNextRail({ items, onItemClick }) {
 
   return (
     <div className="w-52 shrink-0 border border-outline-variant/20 shadow-soft rounded-2xl p-3.5 bg-surface-container-lowest hidden lg:block h-fit">
-      <h3 className="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant mb-2.5">Up next</h3>
+      <h3 className="text-[11px] font-bold tracking-wide text-on-surface-variant mb-2.5">Up next</h3>
       <div className="flex flex-col">
         {items.map((it, i) => (
           <button
@@ -36,7 +36,7 @@ export default function UpNextRail({ items, onItemClick }) {
               style={{ background: it.color || TYPE_DOT[it.type] || 'rgb(var(--tb-secondary))' }}
             />
             <span className="min-w-0">
-              <span className="block text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">
+              <span className="block text-[10px] font-bold tracking-wide text-on-surface-variant">
                 {dayLabel(it.dateStr)}{it.time ? ` · ${it.time}` : ''}
               </span>
               <span className="block text-xs font-medium text-on-surface truncate">{it.title}</span>

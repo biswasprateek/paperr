@@ -44,7 +44,7 @@ export default function HabitDivider({ slotKey, habits, onToggle, height, wrap =
     return (
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 px-3 py-1.5 bg-surface-container-low border-y border-outline-variant/25">
         <span className="text-[13px] leading-none">{slot?.emoji}</span>
-        <span className="text-[11px] font-bold text-on-surface uppercase tracking-wide">{slot?.label ?? slotKey}</span>
+        <span className="text-[11px] font-bold text-on-surface tracking-wide">{slot?.label ?? slotKey}</span>
         <span className="text-[10px] font-bold text-on-surface-variant tabular-nums">{done}/{habits.length}</span>
         {habits.map(h => <HabitChip key={h.id} habit={h} onToggle={onToggle} />)}
       </div>
@@ -60,7 +60,7 @@ export default function HabitDivider({ slotKey, habits, onToggle, height, wrap =
       style={{ height }}
     >
       <span className="text-[13px] leading-none shrink-0">{slot?.emoji}</span>
-      <span className="text-[11px] font-bold text-on-surface shrink-0 uppercase tracking-wide">{slot?.label ?? slotKey}</span>
+      <span className="text-[11px] font-bold text-on-surface shrink-0 tracking-wide">{slot?.label ?? slotKey}</span>
       <span className="text-[10px] font-bold text-on-surface-variant shrink-0 tabular-nums">{done}/{habits.length}</span>
 
       <div className="flex items-center gap-1.5 flex-1 min-w-0 overflow-hidden">

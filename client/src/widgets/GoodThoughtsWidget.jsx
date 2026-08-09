@@ -101,7 +101,7 @@ export default function GoodThoughtsWidget({ editing, collectionIds, onUpdatePro
     <WidgetShell icon="format_quote" title="Good Thoughts" source="/apps" editing={editing}>
       {showPicker ? (
         <div>
-          <p className="text-label-sm uppercase tracking-widest text-on-surface-variant/60 font-bold px-1 pb-1.5">
+          <p className="text-label-md tracking-widest text-on-surface-variant/60 font-bold px-1 pb-1.5">
             Show collections
           </p>
           <div className="space-y-0.5">

@@ -83,12 +83,12 @@ function TaskRow({ task, onClick, onToggleComplete, busy }) {
   );
 }
 
-// Tiny uppercase section label with a trailing rule, used to split the Today
+// Tiny section label with a trailing rule, used to split the Today
 // widget into its Tasks and Habits groups.
 function SectionDivider({ label }) {
   return (
     <div className="flex items-center gap-2 pt-2 pb-0.5 first:pt-0">
-      <span className="text-label-sm uppercase tracking-widest text-on-surface-variant/60 font-bold">{label}</span>
+      <span className="text-label-md tracking-widest text-on-surface-variant/60 font-bold">{label}</span>
       <span className="flex-1 h-px bg-outline-variant/20" />
     </div>
   );
@@ -288,7 +288,7 @@ export function StatsWidget({ editing, perspective = 'personal' }) {
         {stats.map(s => (
           <div key={s.label} className="text-center">
             <p className={`text-headline-lg font-bold ${s.colour}`}>{s.value}</p>
-            <p className="text-label-sm text-on-surface-variant uppercase tracking-wide">{s.label}</p>
+            <p className="text-label-md text-on-surface-variant tracking-wide">{s.label}</p>
           </div>
         ))}
       </div>

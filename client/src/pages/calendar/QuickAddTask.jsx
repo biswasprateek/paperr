@@ -31,7 +31,7 @@ export default function QuickAddTask() {
       onSubmit={handleSubmit}
       className="w-52 shrink-0 border border-outline-variant/20 shadow-soft rounded-2xl p-3.5 bg-surface-container-lowest hidden lg:block"
     >
-      <h3 className="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant mb-2.5">Quick add</h3>
+      <h3 className="text-[11px] font-bold tracking-wide text-on-surface-variant mb-2.5">Quick add</h3>
       <div className="flex items-center gap-1.5">
         <input
           type="text"

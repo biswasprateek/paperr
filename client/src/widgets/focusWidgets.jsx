@@ -97,7 +97,7 @@ export function PomodoroApp({ full }) {
   return (
     <div className={wrap}>
       <div className="flex items-center gap-2">
-        <span className={`text-label-md uppercase tracking-wider font-bold ${meta.accent}`}>{meta.label}</span>
+        <span className={`text-label-md tracking-wider font-bold ${meta.accent}`}>{meta.label}</span>
         <button onClick={() => setShowCfg((v) => !v)} aria-label="Settings" title="Edit timer settings" className="text-on-surface-variant/60 active:scale-95">
           <span className="material-symbols-outlined text-[18px]">tune</span>
         </button>
@@ -438,7 +438,7 @@ export function BreatheApp({ full }) {
           per-phase countdown (or "Ready" when idle), kept small enough to never
           exceed the circle — even at the shrunken exhale state. */}
       {running && (
-        <div className={`uppercase tracking-wider font-bold text-primary ${full ? 'text-title-md' : 'text-label-md'}`}>{label}</div>
+        <div className={`tracking-wider font-bold text-primary ${full ? 'text-title-md' : 'text-label-md'}`}>{label}</div>
       )}
       <div className={`relative ${circle} flex items-center justify-center`}>
         <div
