@@ -1,13 +1,10 @@
 <div align="center">
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset=".github/logo-dark.svg" />
-  <img src=".github/logo.svg" alt="paperr" width="300" />
-</picture>
+<img src=".github/logo.svg" alt="paperr" width="300" />
 
 ### Organize everything. Share nothing.
 
-**paperr** is a private, self-hosted operating system for your household or team — tasks, projects, calendar, notes, routines, focus tools, a shared wall dashboard, and a built-in AI assistant & agents, all running on your own network. Nothing ever leaves your LAN.
+**paperr** is a private, self-hosted operating system for your household or team — tasks, projects, calendar, notes, routines, focus tools, a shared wall dashboard, and a built-in AI assistant, all running on your own network. Nothing ever leaves your LAN.
 
 **100% free. Your data never leaves your network. A tiny but powerful AI that runs on your machine.**
 
@@ -55,82 +52,13 @@ A calendar app answers one question: *what's on today?* Real life is bigger than
 
 <div align="center">
 
-  ### 🏠 Home board & Hub
-
-  | Home board| 
-  | :---: |
-  | ![Home board light](.github/screenshots/desktop/home.png) |
-
   | Hub |
   | :---: |
   | ![Hub](.github/screenshots/desktop/hub.png) |
 
-  ### ✅ Tasks, Lists & Projects
-
-  | Tasks |
-  | :---: | 
-  | ![Tasks](.github/screenshots/desktop/tasks.png) |
-
-
-  | Lists |
+  | Every screen |
   | :---: |
-  | ![Lists](.github/screenshots/desktop/lists.png) |
-
-  | Project View |
-  | :---: |
-  | ![Project detail](.github/screenshots/desktop/project-detail.png) |
-
-  ### 📅 Calendar
-
-  | Month | Week |
-  | :---: | :---: |
-  | ![Calendar month](.github/screenshots/desktop/calendar.png) | ![Calendar week](.github/screenshots/desktop/calendar-week.png) |
-
-  ### 🔁 Routines
-
-  | Routines |
-  | :---: |
-  | ![Routines](.github/screenshots/desktop/routines.png) |
-
-  ### 📓 Notebooks
-
-  | Notebooks |
-  | :---: |
-  | ![Notebook detail](.github/screenshots/desktop/notebook-detail.png) | 
-
-
-  ### 🖼️ Frame 
-
-  | Frame |
-  | :---: |
-  | ![Frame](.github/screenshots/desktop/frame.png) | 
-
-
-  ### 🤖 Agents 
-
-  | Agents |
-  | :---: |
-  | ![Agents](.github/screenshots/desktop/agents.png) | 
-
-  ### 🧘 Apps
-
-  | Apps |
-  | :---: |
-  | ![Apps](.github/screenshots/desktop/apps.png) | 
-
-  ### 📊 Analytics & ⚙️ Settings
-
-  | Analytics | 
-  | :---: | 
-  | ![Analytics](.github/screenshots/desktop/analytics.png) |
-
-  | Settings |
-  | :---: |
-  | ![Settings](.github/screenshots/desktop/settings.png) | 
-
-  | Home board — Dark Mode |
-  | :---: |
-  | ![Home board dark](.github/screenshots/desktop/home-dark.png) |
+  | ![paperr screens](.github/screenshots/carousel-3x.gif) |
 
 </div>
 
@@ -296,25 +224,12 @@ The mode is auto-detected from screen size and touch support on first load, reme
 
 ### Install & run (development)
 
-#### Option 1 — npm *(recommended)*
-
-```bash
-npx paperr               # fetches paperr into ./paperr — add a folder name for a custom location
-cd paperr
-npm run install:all      # installs root + server + client dependencies, creates server/.env
-npm run dev              # starts API (:3000) and client (:5173) together
-```
-
-#### Option 2 — git
-
 ```bash
 git clone https://github.com/biswasprateek/paperr.git
 cd paperr
 npm run install:all      # installs root + server + client dependencies, creates server/.env
 npm run dev              # starts API (:3000) and client (:5173) together
 ```
-
-> Both land in the same place. The npm package is only a thin fetcher — paperr is a self-hosted app, not a library, so there's nothing to `npm install` into an existing project.
 
 > 🔐 `npm run install:all` creates `server/.env` from `.env.example` (if it doesn't already exist) and auto-generates real random values for `JWT_SECRET` / `JWT_REFRESH_SECRET` — no manual copy/paste step needed. It never overwrites secrets you've already set. To (re-)run just that step: `npm run setup:env`.
 
@@ -334,14 +249,14 @@ On first launch, the **Setup Wizard** walks you through creating your first spac
 
 ### Production (recommended for everyday use)
 
-**Windows — one click:**
+**Windows:**
 
 ```powershell
 ./start-paperr.ps1            # builds the client, then serves everything on :3000
 ./start-paperr.ps1 -NoBuild   # skip rebuild if the client is already current
 ```
 
-**macOS / Linux — one click:**
+**macOS / Linux:**
 
 ```bash
 ./start-paperr.sh
@@ -355,6 +270,28 @@ npm start       # Express serves the API + app on port 3000
 ```
 
 Then open **`http://<your-machine-ip>:3000`** from any device on your network.
+
+### 🧪 One-click installers (experimental)
+
+> **Experimental — not the supported path yet.** Verified end to end on Windows and Linux; macOS is untested. If anything goes sideways, use the steps above, which remain the recommended way to install and run paperr.
+
+For non-technical users, one downloadable file does the whole thing:
+
+| OS      | File                                                            | First run                                            |
+| ------- | --------------------------------------------------------------- | ---------------------------------------------------- |
+| Windows | [`install/paperr-windows.cmd`](install/paperr-windows.cmd)   | SmartScreen may warn — **More info → Run anyway** |
+| macOS   | [`install/paperr-macos.command`](install/paperr-macos.command) | `chmod +x` it, then right-click → **Open**        |
+| Linux   | [`install/paperr-linux.sh`](install/paperr-linux.sh)         | `chmod +x` it                                        |
+
+Still needs **Node 22.5+** and **git** — the file links you to them if either is missing. On first run it clones paperr to `~/paperr` (`%USERPROFILE%\paperr` on Windows), installs dependencies, generates `server/.env`, builds the client, starts the server on `:3000`, and opens the app. Every run after that just starts it.
+
+**Everyday use:** the installer adds a desktop shortcut plus an app-menu entry (Start Menu / `~/Applications/paperr.app` / `.desktop`). Clicking it starts the server if it isn't already running, then opens paperr in a chromeless Chrome/Edge window — an app window with its own icon and taskbar entry. No Electron, no bundled browser, nothing installed system-wide, and **no code signing on any platform** — which is exactly why Windows shows the SmartScreen prompt the first time. Without a Chromium-family browser it falls back to a normal tab in your default one.
+
+From an existing checkout, `npm run app` does the same thing (`npm run app -- --dev` for the dev servers).
+
+**Uninstalling:** Windows registers paperr in **Settings → Installed apps**. macOS and Linux have no equivalent, so run `npm run uninstall` from the install folder. Either way your database, uploads and backups are left untouched — add `--purge` to delete those as well.
+
+Full detail, including the failure modes: [`install/README.md`](install/README.md).
 
 ---
 

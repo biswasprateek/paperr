@@ -1,3 +1,69 @@
+# Release 1.0.1 — "Begonia"
+
+_2026-08-11_
+
+An install-and-update release. paperr can now be installed by double-clicking one file on Windows, macOS, or Linux, launches from a real desktop/Start-Menu entry into its own app window, updates itself from Settings, and uninstalls cleanly. Plus archivable habits, and a typography pass across the app.
+
+## Highlights
+
+### 🧪 One-click installers (experimental)
+
+Three downloadable files — [`install/paperr-windows.cmd`](install/paperr-windows.cmd), [`install/paperr-macos.command`](install/paperr-macos.command), [`install/paperr-linux.sh`](install/paperr-linux.sh) — take a non-technical user from nothing to a running paperr in one double-click. Each checks for Node 22.5+ and git (linking to the download page if either is missing), then pulls the bootstrap from the repo rather than npm, so the file never goes stale and a new release needs no `npm publish`.
+
+First run clones paperr to `~/paperr` (`%USERPROFILE%\paperr` on Windows), installs dependencies, generates `server/.env` with real JWT secrets, builds the client, starts the server on `:3000`, and opens the app. Every run after that just starts it.
+
+> **Experimental — not the supported path yet.** Verified end to end on Windows and Linux; macOS is untested. The documented `git clone` + `npm run install:all` steps remain the recommended way to install paperr.
+
+### Desktop app entry, without Electron
+
+[`scripts/launch.js`](scripts/launch.js) is a single idempotent launcher: it starts the server only if it isn't already answering, creates a desktop entry (Desktop shortcut + Start Menu on Windows, `~/Applications/paperr.app` on macOS, `.desktop` on Linux), then opens paperr in a chromeless Chrome/Edge/Brave window via `--app=` — an app window with its own icon and taskbar entry, with no bundled browser and nothing installed system-wide. Falls back to a normal tab when no Chromium-family browser is present, and prints the URL when there's no opener at all (headless boxes, WSL). Desktop entries are rewritten on every launch, so one pointing at a moved or deleted checkout repairs itself. Also reachable from an existing checkout as `npm run app` (`npm run app -- --dev` for the dev servers).
+
+The launcher records the server PID and logs to `paperr.log`, and reports both the local and LAN URLs on start — preferring a genuine `192.168.x`/`10.x` address over docker0 and WSL bridges.
+
+### Uninstall
+
+Windows registers paperr under **Settings → Installed apps** (HKCU, so no admin rights), with a working Uninstall button. macOS and Linux have no equivalent registry, so `npm run uninstall` does the same job by hand: stops the server, removes shortcuts / the `.app` / the `.desktop` file. Your database, uploads and backups are deliberately left in place — the uninstaller prints where they are. `npm run uninstall -- --purge` deletes those too.
+
+### In-app updates
+
+A new **Updates** panel in Settings (admin only) checks the repository this install was cloned from and pulls it onto the machine. Both the check and the apply hit the network, so they only ever run on click, never on page load.
+
+`npx paperr` clones with `--depth 1`, so [`server/services/updateService.js`](server/services/updateService.js) stays shallow-safe throughout — it compares SHAs and hard-resets rather than merging or counting commits. It refuses to run when there are local changes to tracked files (untracked files survive a reset, so they don't count), and after updating it reinstalls only the workspaces whose `package.json`/lockfile changed and rebuilds the client only when something under `client/` moved. Concurrent update requests are rejected with a 409.
+
+The pulled server code takes effect on the next launch — the panel says so rather than restarting under you.
+
+### `npx paperr` now installs *and* starts
+
+The npm bootstrap was a clone-and-print-instructions script; it now hands off to the launcher, so `npx paperr` clones, installs, builds, starts, and opens the app in one go. Re-running it against an existing checkout skips the clone and just starts paperr, which makes it double as a start command. Node version is checked up front (the server needs `node:sqlite`, so 22.5+), an existing checkout from before the launcher existed is brought up to date with `git pull --ff-only` instead of forcing a delete-and-re-clone, and an interrupted clone gets a clear message rather than a git failure.
+
+### Archive habits
+
+Habits can be archived from the habit editor instead of only deleted — archiving hides a habit everywhere but keeps its streaks and history, and it can be put back at any time. Routines → Progress grows an **Archived** section (auto-expanded when there's something in it, with the count visible while collapsed); clicking an archived habit reopens it in the editor to unarchive. Backed by `GET /routines/progress?archived=1`; archiving is just `is_active = 0` via the existing `PATCH /habits/:id`, so no completions are ever deleted. Self-check at `server/routes/routines.archive.test.js`.
+
+### Typography pass
+
+Small-caps labels are gone. Across forms, table headers, modals, buttons, widgets, and the calendar, `text-label-sm uppercase` became plain `text-label-md` — larger, lower-contrast-free, and legible at a glance instead of decorative.
+
+### App icon on every surface
+
+Raster favicons (16/32/512) alongside the SVG, since Chromium app windows and home-screen installs use the PNGs for the window, taskbar, and launcher icon — not the SVG. The launcher derives a Windows `.ico` from the 512px PNG at runtime (Vista+ reads PNG-compressed icon entries directly), and macOS converts the same file to `.icns` with the built-in `sips`.
+
+### Docs
+
+README trimmed: the long per-feature screenshot gallery collapsed into a single carousel, npm install instructions replaced by the one-click section, and the experimental installers documented with their failure modes. Full detail, including what happens when each step fails, lives in [`install/README.md`](install/README.md).
+
+## Fixes
+
+- `.gitattributes` now pins line endings per launcher type (`*.cmd`/`*.ps1` CRLF, `*.sh`/`*.command` LF) — a shell script checked out with CRLF fails to run at all.
+- CONTRIBUTING's dev setup told you to `cd paperr-dev` after cloning into `paperr`.
+- `npm run app` on Windows no longer emits Node's DEP0190 warning about unescaped shell arguments.
+
+## Dependencies
+
+- No new dependencies this release. The launcher, uninstaller, and updater use only Node built-ins.
+
+---
+
 # Release 1.0.0-beta — "Azalea"
 
 _2026-08-01_

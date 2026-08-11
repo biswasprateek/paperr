@@ -23,7 +23,7 @@ Open an issue describing the problem you're trying to solve, not just the soluti
 
 ```bash
 git clone https://github.com/biswasprateek/paperr.git
-cd paperr-dev
+cd paperr
 npm run install:all   # installs root, server, and client deps + env setup
 npm run dev            # runs server + client together
 ```

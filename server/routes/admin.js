@@ -3,6 +3,7 @@ const router = express.Router();
 const { getDb } = require('../db/db');
 const { requireAuth, requireAdmin } = require('../auth/middleware');
 const { pingLLM, fetchModels, LLMUnavailableError } = require('../ai/llmClient');
+const updateService = require('../services/updateService');
 
 router.get('/audit-log', requireAuth, requireAdmin, (req, res) => {
   const db = getDb();
@@ -192,6 +193,33 @@ router.post('/export', requireAuth, requireAdmin, (req, res) => {
   }
   res.setHeader('Content-Disposition', 'attachment; filename=paperr-export.json');
   return res.json(data);
+});
+
+// ── Updates ───────────────────────────────────────────────────────────────────
+
+// git errors carry the useful part on stderr.
+const updateError = (err) => (err.stderr || err.message || '').trim();
+
+router.get('/update', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    return res.json(await updateService.check());
+  } catch (err) {
+    return res.status(500).json({ error: updateError(err) });
+  }
+});
+
+let updating = false;
+
+router.post('/update', requireAuth, requireAdmin, async (req, res) => {
+  if (updating) return res.status(409).json({ error: 'An update is already running.' });
+  updating = true;
+  try {
+    return res.json(await updateService.apply({ force: req.body?.force }));
+  } catch (err) {
+    return res.status(err.status || 500).json({ error: updateError(err) });
+  } finally {
+    updating = false;
+  }
 });
 
 module.exports = router;

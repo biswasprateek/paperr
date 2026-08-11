@@ -9,6 +9,9 @@ uploads/
 certs/
 .DS_Store
 Thumbs.db
+paperr.log
+paperr.pid
+paperr.ico
 /.claude
 /.agents
 /.design/inspiration
@@ -19,4 +22,3 @@ server/data/backups/*
 !server/data/logs/.gitkeep
 !server/data/databases/.gitkeep
 !server/data/backups/.gitkeep
-skills-lock.json

@@ -318,6 +318,18 @@ export default function Settings() {
 
   const [showBackupModal, setShowBackupModal] = useState(false);
 
+  // ── Updates (global admin) — both calls hit the network (git fetch), so they
+  // only run on click, never on page load.
+  const [updateInfo,  setUpdateInfo]  = useState(null);
+  const [updateError, setUpdateError] = useState('');
+  const updateOpts = {
+    onMutate:  () => setUpdateError(''),
+    onSuccess: setUpdateInfo,
+    onError:   (e) => setUpdateError(e.response?.data?.error || e.message),
+  };
+  const checkUpdate = useMutation({ mutationFn: () => api.get('/admin/update').then(r => r.data), ...updateOpts });
+  const applyUpdate = useMutation({ mutationFn: () => api.post('/admin/update').then(r => r.data), ...updateOpts });
+
   const [showForm,       setShowForm]       = useState(false);
   const [editingId,      setEditingId]      = useState(null);
   const [form,           setForm]           = useState(DEFAULT_FORM);
@@ -1889,6 +1901,54 @@ export default function Settings() {
           <span className="material-symbols-outlined text-[16px]">backup</span>
           Manage Backups
         </button>
+      </section>
+
+      {/* Updates */}
+      <section className="bg-surface-container-lowest rounded-xl border border-outline-variant/20 shadow-soft p-card-padding space-y-4">
+        <div className="flex items-center gap-2">
+          <span className="material-symbols-outlined text-primary text-[20px]">system_update_alt</span>
+          <h2 className="text-headline-md text-on-background">Updates</h2>
+        </div>
+        <p className="text-body-md text-on-surface-variant">
+          Check the paperr repository for a newer version and pull it onto this machine.
+        </p>
+
+        {updateInfo && (
+          <div className="text-body-md text-on-surface-variant space-y-1">
+            <p>Installed <span className="font-mono">{updateInfo.current}</span> on <span className="font-mono">{updateInfo.branch}</span></p>
+            {updateInfo.updateAvailable
+              ? <p>Available <span className="font-mono">{updateInfo.latest}</span> — {updateInfo.message}</p>
+              : <p className="text-primary">paperr is up to date.</p>}
+            {updateInfo.restartRequired && (
+              <p className="text-primary">Updated — restart paperr to run the new version.</p>
+            )}
+            {updateInfo.dirty && (
+              <p className="text-error">This install has local changes to tracked files; updating would discard them.</p>
+            )}
+          </div>
+        )}
+        {updateError && <p className="text-label-sm text-error bg-error-container px-4 py-2.5 rounded-xl">{updateError}</p>}
+
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => checkUpdate.mutate()}
+            disabled={checkUpdate.isPending || applyUpdate.isPending}
+            className="flex items-center gap-2 px-5 py-2.5 bg-primary text-on-primary rounded-full text-label-md font-bold hover:bg-primary/90 transition disabled:opacity-50"
+          >
+            <span className="material-symbols-outlined text-[16px]">sync</span>
+            {checkUpdate.isPending ? 'Checking…' : 'Check for Updates'}
+          </button>
+          {updateInfo?.updateAvailable && !updateInfo.dirty && (
+            <button
+              onClick={() => applyUpdate.mutate()}
+              disabled={applyUpdate.isPending}
+              className="flex items-center gap-2 px-5 py-2.5 bg-surface-container-high text-on-surface rounded-full text-label-md font-bold hover:bg-surface-container-highest transition disabled:opacity-50"
+            >
+              <span className="material-symbols-outlined text-[16px]">download</span>
+              {applyUpdate.isPending ? 'Updating…' : 'Update Now'}
+            </button>
+          )}
+        </div>
       </section>
 
       </>

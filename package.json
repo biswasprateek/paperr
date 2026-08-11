@@ -1,6 +1,5 @@
 {
   "name": "paperr",
-  "private": true,
   "version": "1.0.0-beta",
   "description": "Self-hosted household OS — tasks, calendar, notes, and a local AI assistant, all LAN-only",
   "scripts": {
@@ -10,7 +9,9 @@
     "build": "cd client && npm run build",
     "start": "cd server && npm start",
     "install:all": "npm install && cd server && npm install && cd ../client && npm install && cd .. && npm run setup:env",
-    "setup:env": "node scripts/setup-env.js"
+    "setup:env": "node scripts/setup-env.js",
+    "app": "node scripts/launch.js",
+    "uninstall": "node scripts/uninstall.js"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

@@ -1,7 +1,7 @@
 {
   "name": "paperr",
   "version": "1.0.0-beta",
-  "description": "paperr is a private, self-hosted platform for your household or team — tasks, projects, calendar, notes, routines,focus tools, a shared wall dashboard, and a built-in AI assistant & agents, all running on your own network. This package clones the repo; see github.com/biswasprateek/paperr",
+  "description": "paperr is a private, self-hosted platform for you, your household or team — tasks, projects, calendar, notes, routines,focus tools, a shared wall dashboard, and a built-in AI assistant & agents, all running on your own network. This package clones the repo; see github.com/biswasprateek/paperr",
   "bin": {
     "paperr": "bin/paperr.js"
   },
@@ -18,7 +18,7 @@
     "local-ai",
     "lan"
   ],
-  "homepage": "https://paperr.ai",
+  "homepage": "https://paperr.ai/",
   "bugs": "https://github.com/biswasprateek/paperr/issues",
   "repository": {
     "type": "git",
