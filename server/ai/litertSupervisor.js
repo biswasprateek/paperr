@@ -19,7 +19,14 @@ const CLI_PATH = process.platform === 'win32'
   : path.join(VENV_DIR, 'bin', 'litert-lm');
 const PID_FILE = path.join(__dirname, 'litert', 'server.pid');
 
-const execFileP = util.promisify(execFile);
+// windowsHide on every child: these are all console programs, and the server
+// can be running with no console of its own (scripts/launch.js starts it
+// detached). Without this, Windows hands each child a brand-new console and
+// its window pops on screen — once every few seconds for the memory poll.
+// Node defaults windowsHide to false, so it has to be explicit.
+const HIDDEN = { windowsHide: true };
+const execFileRaw = util.promisify(execFile);
+const execFileP = (file, args, opts) => execFileRaw(file, args, { ...HIDDEN, ...opts });
 const treeKillP = util.promisify(treeKill);
 
 // Only letters/digits/dot/dash/underscore/slash — HF repo ids and file/model
@@ -155,7 +162,7 @@ async function launch() {
   await cleanupStalePid();
   if (status !== 'starting') return; // stop() was called while we were cleaning up
 
-  const self = spawn(CLI_PATH, ['serve', '--host', HOST, '--port', String(PORT)]);
+  const self = spawn(CLI_PATH, ['serve', '--host', HOST, '--port', String(PORT)], HIDDEN);
   child = self;
   fs.mkdirSync(path.dirname(PID_FILE), { recursive: true });
   fs.writeFileSync(PID_FILE, String(self.pid));
@@ -249,7 +256,7 @@ function importModel({ repo, file, name }) {
 
   importJob = { repo, file, name, status: 'running', log: [], error: null };
   const job = importJob;
-  const proc = spawn(CLI_PATH, args);
+  const proc = spawn(CLI_PATH, args, HIDDEN);
 
   proc.stdout.on('data', d => job.log.push(d.toString()));
   proc.stderr.on('data', d => job.log.push(d.toString()));

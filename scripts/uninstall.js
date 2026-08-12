@@ -13,7 +13,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
-const { readPort, UNINSTALL_KEY } = require('./launch.js');
+const { readPort, UNINSTALL_KEY, SHORTCUTS, slug } = require('./launch.js');
 
 const root = path.join(__dirname, '..');
 const win = process.platform === 'win32';
@@ -50,16 +50,30 @@ function removeEntries() {
   if (win) {
     spawnSync('powershell', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', [
       "foreach ($d in @([Environment]::GetFolderPath('Desktop'), [Environment]::GetFolderPath('Programs'))) {",
-      "  Remove-Item (Join-Path $d 'paperr.lnk') -Force -ErrorAction SilentlyContinue",
+      ...SHORTCUTS.map(({ name }) => `  Remove-Item (Join-Path $d '${name}.lnk') -Force -ErrorAction SilentlyContinue`),
       '}',
       `Remove-Item '${UNINSTALL_KEY}' -Recurse -Force -ErrorAction SilentlyContinue`,
     ].join('\n')], { stdio: 'ignore' });
     return;
   }
-  const entry = process.platform === 'darwin'
-    ? path.join(os.homedir(), 'Applications', 'paperr.app')
-    : path.join(os.homedir(), '.local', 'share', 'applications', 'paperr.desktop');
-  fs.rmSync(entry, { recursive: true, force: true });
+
+  const lsregister = '/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister';
+
+  for (const { name } of SHORTCUTS) {
+    const entry = process.platform === 'darwin'
+      ? path.join(os.homedir(), 'Applications', `${name}.app`)
+      : path.join(os.homedir(), '.local', 'share', 'applications', `${slug(name)}.desktop`);
+
+    fs.rmSync(entry, { recursive: true, force: true });
+
+    // rmSync alone leaves a ghost icon in Launchpad: its index comes from the
+    // LaunchServices database, which only Finder-driven deletes update. Telling
+    // it to forget the path has to happen after the delete — lsregister hands
+    // the unregister off to a daemon rather than committing it inline, and
+    // running it first races the delete: the bundle can end up re-registered
+    // instead of dropped. Confirmed empirically; order is load-bearing here.
+    if (process.platform === 'darwin') spawnSync(lsregister, ['-u', entry], { stdio: 'ignore' });
+  }
 }
 
 (async () => {

@@ -3,6 +3,25 @@ REM One-click paperr for Windows. Installs to %USERPROFILE%\paperr on the first
 REM run and just launches on every run after. Pass --dev for the dev servers.
 setlocal
 
+echo.
+echo                               .+:
+echo                          .+####+
+echo                    ..+########+.     ####   ###  ####  ##### ####  ####
+echo               .:+###########++:      #   # #   # #   # #     #     #
+echo          .:+###############+++       ####  ##### ####  ####  #     #
+echo     .:+##################++++.       #     #   # #     #     #     #
+echo  .:+++##################++++.        #     #   # #     ##### #     #
+echo                 ....:+++++++         #           #
+echo                    ...:++++          #           #
+echo                      ..+++.
+echo                        .+:
+echo                         :
+echo.
+echo A private, self-hosted platform for you, your household or team — tasks, projects, 
+echo calendar, notes, routines,focus tools, a shared wall dashboard, 
+echo and a built-in AI assistant & agents, all running on your own network.
+echo.
+
 where node >nul 2>nul
 if errorlevel 1 (
   echo paperr needs Node.js 22.5 or newer.
@@ -21,15 +40,16 @@ if errorlevel 1 (
   exit /b 1
 )
 
-REM Pull the bootstrap from the repo rather than npm: this file then never goes
-REM stale, and a new release needs no npm publish. curl ships with Windows 10+.
-set "BOOT=%TEMP%\paperr-install.js"
-curl -fsSL -o "%BOOT%" https://raw.githubusercontent.com/biswasprateek/paperr/main/npm/bin/paperr.js
-if errorlevel 1 (
-  echo Could not download the paperr installer — check your internet connection.
-  pause
-  exit /b 1
-)
+echo Setting up paperr in %USERPROFILE%\paperr - every run after this one just starts it.
+echo.
 
-node "%BOOT%" "%USERPROFILE%\paperr" %*
+REM Run from the home folder, never from wherever this file was saved: npx walks
+REM up looking for a local package named "paperr", and the repo's own root
+REM package.json is named exactly that but has no bin — which makes npx give up
+REM with "could not determine executable to run".
+cd /d "%USERPROFILE%"
+
+REM Delivered through npm rather than a direct download so installs show up in
+REM the package's download stats. @latest keeps testers off a stale cached copy.
+call npx -y paperr@latest "%USERPROFILE%\paperr" %*
 if errorlevel 1 pause

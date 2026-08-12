@@ -38,6 +38,7 @@ if (!existsSync(launcher)) {
   if (existsSync(path.join(dir, ".git"))) {
     // A checkout from before the launcher existed, or just behind — update it
     // in place rather than making people delete and re-clone.
+    console.log(`[paperr] Updating your existing install in ${dir}...`);
     run("git", ["pull", "--ff-only"], dir);
   } else if (existsSync(dir)) {
     // Usually a clone that was interrupted partway; git won't clone into it.
@@ -45,6 +46,7 @@ if (!existsSync(launcher)) {
     console.error("Delete it and run this again, or pass another directory.");
     process.exit(1);
   } else {
+    console.log(`[paperr] Downloading paperr into ${dir} (a one-time step)...`);
     run("git", ["clone", "--depth", "1", REPO, dir]);
   }
 }

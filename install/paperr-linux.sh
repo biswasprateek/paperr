@@ -5,7 +5,28 @@
 # Mark it executable once so file managers will run it on double-click:
 #   chmod +x paperr-linux.sh
 
-for tool in node git curl; do
+cat <<'BANNER'
+
+                             .+:
+                        .+####+
+                  ..+########+.     ####   ###  ####  ##### ####  ####
+             .:+###########++:      #   # #   # #   # #     #     #
+        .:+###############+++       ####  ##### ####  ####  #     #
+   .:+##################++++.       #     #   # #     #     #     #
+.:+++##################++++.        #     #   # #     ##### #     #
+               ....:+++++++         #           #
+                  ...:++++          #           #
+                    ..+++.
+                      .+:
+                       :
+
+ A private, self-hosted platform for you, your household or team — tasks, projects, 
+ calendar, notes, routines,focus tools, a shared wall dashboard, 
+ and a built-in AI assistant & agents, all running on your own network.
+
+BANNER
+
+for tool in node git; do
   command -v "$tool" >/dev/null || {
     echo "paperr needs $tool (Node.js 22.5+). Install it with your package manager"
     echo "or from https://nodejs.org/en/download, then run this file again."
@@ -13,12 +34,15 @@ for tool in node git curl; do
   }
 done
 
-# Pull the bootstrap from the repo rather than npm: this file then never goes
-# stale, and a new release needs no npm publish.
-BOOT="${TMPDIR:-/tmp}/paperr-install.js"
-curl -fsSL -o "$BOOT" https://raw.githubusercontent.com/biswasprateek/paperr/main/npm/bin/paperr.js || {
-  echo "Could not download the paperr installer — check your internet connection."
-  exit 1
-}
+echo "Setting up paperr in ~/paperr — every run after this one just starts it."
+echo
 
-exec node "$BOOT" "$HOME/paperr" "$@"
+# Run from the home folder, never from wherever this file was saved: npx walks
+# up looking for a local package named "paperr", and the repo's own root
+# package.json is named exactly that but has no bin — which makes npx give up
+# with "could not determine executable to run".
+cd "$HOME" || exit 1
+
+# Delivered through npm rather than a direct download so installs show up in the
+# package's download stats. @latest keeps testers off a stale cached copy.
+exec npx -y paperr@latest "$HOME/paperr" "$@"

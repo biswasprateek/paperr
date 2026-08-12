@@ -60,20 +60,31 @@ function icoPath() {
 // ponytail: brief console flash on launch; wrap in a .vbs stub if it annoys.
 const SHORTCUT_FOLDERS = "@([Environment]::GetFolderPath('Desktop'), [Environment]::GetFolderPath('Programs'))";
 
+// Two shortcuts, one install: "paperr" runs the dev servers for hacking on the
+// code, "paperr LAN Server" runs the production build other devices on the
+// network can reach. Shared by every platform's shortcut/entry builder below,
+// and by the uninstaller, so the two lists never drift apart.
+const SHORTCUTS = [
+  { name: 'paperr', dev: true },
+  { name: 'paperr LAN Server', dev: false },
+];
+
+const slug = (name) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
 function winShortcutScript(icon, folders = SHORTCUT_FOLDERS) {
-  return [
+  return SHORTCUTS.map(({ name, dev }) => [
     '$w = New-Object -ComObject WScript.Shell',
     `foreach ($d in ${folders}) {`,
-    "  $s = $w.CreateShortcut((Join-Path $d 'paperr.lnk'))",
+    `  $s = $w.CreateShortcut((Join-Path $d '${name}.lnk'))`,
     `  $s.TargetPath = '${process.execPath}'`,
-    `  $s.Arguments = '"${__filename}"'`,
+    `  $s.Arguments = '"${__filename}"${dev ? ' --dev' : ''}'`,
     `  $s.WorkingDirectory = '${root}'`,
-    "  $s.Description = 'paperr'",
+    `  $s.Description = '${name}'`,
     '  $s.WindowStyle = 7',
     icon ? `  $s.IconLocation = '${icon}'` : '',
     '  $s.Save()',
     '}',
-  ].filter(Boolean).join('\n');
+  ].filter(Boolean).join('\n')).join('\n');
 }
 
 // What puts paperr in Settings -> Installed apps with a working Uninstall
@@ -105,20 +116,72 @@ function winShortcut() {
   spawnSync('powershell', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', ps], { stdio: 'ignore' });
 }
 
-// Rewritten each launch so a bundle pointing at a moved checkout self-repairs.
-function macApp() {
-  const app = path.join(os.homedir(), 'Applications', 'paperr.app');
-  fs.mkdirSync(path.join(app, 'Contents', 'MacOS'), { recursive: true });
-  fs.mkdirSync(path.join(app, 'Contents', 'Resources'), { recursive: true });
+// A single-image .icns is what makes Launchpad look pixelated — it upscales
+// whatever one representation it finds. macOS wants every size present, so
+// build a full .iconset and let iconutil compile it.
+//
+// Sizes come from favicon.svg where possible: it is vector, so 1024 (512@2x)
+// is genuinely sharp rather than an upscaled 512 bitmap. sharp is already a
+// server dependency and has librsvg built in; without it, fall back to sips
+// downscaling the 512 PNG, which still beats one lone representation.
+const ICON_SIZES = [16, 32, 128, 256, 512];
 
-  // Built locally, so it carries no quarantine flag — Gatekeeper stays quiet
-  // without any signing or notarisation. LSUIElement hides the launcher itself
-  // from the Dock; the browser window it opens gets its own icon.
-  fs.writeFileSync(path.join(app, 'Contents', 'Info.plist'), `<?xml version="1.0" encoding="UTF-8"?>
+function loadSharp() {
+  try {
+    return require(path.join(root, 'server', 'node_modules', 'sharp'));
+  } catch {
+    return null;
+  }
+}
+
+async function makeIcns(dest) {
+  const sharp = loadSharp();
+  const svg = path.join(root, 'client', 'public', 'favicon.svg');
+  const vector = sharp && fs.existsSync(svg);
+  const set = path.join(os.tmpdir(), `paperr-${process.pid}.iconset`);
+  fs.mkdirSync(set, { recursive: true });
+
+  try {
+    for (const size of ICON_SIZES) {
+      for (const [px, name] of [[size, `icon_${size}x${size}.png`], [size * 2, `icon_${size}x${size}@2x.png`]]) {
+        const out = path.join(set, name);
+        if (vector) {
+          fs.writeFileSync(out, await sharp(svg).resize(px, px).png().toBuffer());
+        } else {
+          spawnSync('sips', ['-z', String(px), String(px), logoPng, '--out', out], { stdio: 'ignore' });
+        }
+      }
+    }
+    if (spawnSync('iconutil', ['-c', 'icns', set, '-o', dest], { stdio: 'ignore' }).status === 0) return true;
+
+    // Last resort: the old single-image conversion. Blurry, but an icon.
+    spawnSync('sips', ['-s', 'format', 'icns', logoPng, '--out', dest], { stdio: 'ignore' });
+    return fs.existsSync(dest);
+  } catch (err) {
+    console.warn(`[paperr] Icon generation failed (${err.message}) — using the generic icon.`);
+    return false;
+  } finally {
+    fs.rmSync(set, { recursive: true, force: true });
+  }
+}
+
+// Rewritten each launch so a bundle pointing at a moved checkout self-repairs.
+async function macApps() {
+  let iconChanged = false;
+
+  for (const { name, dev } of SHORTCUTS) {
+    const app = path.join(os.homedir(), 'Applications', `${name}.app`);
+    fs.mkdirSync(path.join(app, 'Contents', 'MacOS'), { recursive: true });
+    fs.mkdirSync(path.join(app, 'Contents', 'Resources'), { recursive: true });
+
+    // Built locally, so it carries no quarantine flag — Gatekeeper stays quiet
+    // without any signing or notarisation. LSUIElement hides the launcher itself
+    // from the Dock; the browser window it opens gets its own icon.
+    fs.writeFileSync(path.join(app, 'Contents', 'Info.plist'), `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
-  <key>CFBundleName</key><string>paperr</string>
-  <key>CFBundleIdentifier</key><string>ai.paperr.launcher</string>
+  <key>CFBundleName</key><string>${name}</string>
+  <key>CFBundleIdentifier</key><string>ai.paperr.launcher${dev ? '' : '.lan'}</string>
   <key>CFBundleExecutable</key><string>paperr</string>
   <key>CFBundleIconFile</key><string>paperr</string>
   <key>CFBundlePackageType</key><string>APPL</string>
@@ -126,38 +189,50 @@ function macApp() {
 </dict></plist>
 `);
 
-  const exe = path.join(app, 'Contents', 'MacOS', 'paperr');
-  fs.writeFileSync(exe, `#!/bin/sh\nexec "${process.execPath}" "${__filename}"\n`);
-  fs.chmodSync(exe, 0o755);
+    const exe = path.join(app, 'Contents', 'MacOS', 'paperr');
+    fs.writeFileSync(exe, `#!/bin/sh\nexec "${process.execPath}" "${__filename}"${dev ? ' --dev' : ''}\n`);
+    fs.chmodSync(exe, 0o755);
 
-  // sips ships with macOS and converts the square 512px mark straight to .icns.
-  const icns = path.join(app, 'Contents', 'Resources', 'paperr.icns');
-  if (!fs.existsSync(icns)) {
-    const r = spawnSync('sips', ['-s', 'format', 'icns', logoPng, '--out', icns], { stdio: 'ignore' });
-    if (r.status !== 0) console.warn('[paperr] Icon conversion failed — the app will use the generic icon.');
+    // Bumped when the icon pipeline changes, so existing installs regenerate
+    // instead of keeping whatever the previous version produced.
+    const icns = path.join(app, 'Contents', 'Resources', 'paperr.icns');
+    const stamp = path.join(app, 'Contents', 'Resources', '.icon-v2');
+    if (!fs.existsSync(stamp) || !fs.existsSync(icns)) {
+      await makeIcns(icns);
+      fs.writeFileSync(stamp, '');
+      // Launchpad and the Dock cache icons hard; without this the old one sticks.
+      spawnSync('touch', [app], { stdio: 'ignore' });
+      iconChanged = true;
+    }
   }
+
+  if (iconChanged) spawnSync('killall', ['Dock'], { stdio: 'ignore' });
 }
 
 // Rewritten each launch so an entry pointing at a moved checkout self-repairs.
 function linuxDesktop() {
-  const file = path.join(os.homedir(), '.local', 'share', 'applications', 'paperr.desktop');
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, `[Desktop Entry]
+  const dir = path.join(os.homedir(), '.local', 'share', 'applications');
+  fs.mkdirSync(dir, { recursive: true });
+
+  for (const { name, dev } of SHORTCUTS) {
+    const file = path.join(dir, `${slug(name)}.desktop`);
+    fs.writeFileSync(file, `[Desktop Entry]
 Type=Application
-Name=paperr
+Name=${name}
 Comment=Self-hosted household OS
-Exec="${process.execPath}" "${__filename}"
+Exec="${process.execPath}" "${__filename}"${dev ? ' --dev' : ''}
 Icon=${logoPng}
 Terminal=false
 Categories=Utility;Office;
 `);
-  fs.chmodSync(file, 0o755);
+    fs.chmodSync(file, 0o755);
+  }
 }
 
-function ensureDesktopEntry() {
-  const make = { win32: winShortcut, darwin: macApp, linux: linuxDesktop }[process.platform];
+async function ensureDesktopEntry() {
+  const make = { win32: winShortcut, darwin: macApps, linux: linuxDesktop }[process.platform];
   try {
-    if (make) make();
+    if (make) await make();
   } catch (err) {
     console.warn(`[paperr] Couldn't create the desktop shortcut: ${err.message}`);
   }
@@ -175,19 +250,32 @@ const CHROMIUM = {
     'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
     'C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe',
   ],
+  // Relative to each of MAC_APP_DIRS — plenty of people install to ~/Applications.
   darwin: [
-    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-    '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
-    '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser',
+    'Google Chrome.app/Contents/MacOS/Google Chrome',
+    'Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
+    'Brave Browser.app/Contents/MacOS/Brave Browser',
+    'Vivaldi.app/Contents/MacOS/Vivaldi',
+    'Chromium.app/Contents/MacOS/Chromium',
   ],
   linux: ['google-chrome', 'chromium', 'chromium-browser', 'microsoft-edge', 'brave-browser'],
 };
 
+const MAC_APP_DIRS = ['/Applications', path.join(os.homedir(), 'Applications')];
+
 function findBrowser() {
   const candidates = CHROMIUM[process.platform] || [];
-  return process.platform === 'linux'
-    ? candidates.find((b) => spawnSync('which', [b], { stdio: 'ignore' }).status === 0)
-    : candidates.find((p) => fs.existsSync(p));
+  if (process.platform === 'linux') {
+    return candidates.find((b) => spawnSync('which', [b], { stdio: 'ignore' }).status === 0);
+  }
+  if (process.platform === 'darwin') {
+    for (const dir of MAC_APP_DIRS) {
+      const hit = candidates.map((rel) => path.join(dir, rel)).find((p) => fs.existsSync(p));
+      if (hit) return hit;
+    }
+    return undefined;
+  }
+  return candidates.find((p) => fs.existsSync(p));
 }
 
 function openApp(url) {
@@ -196,6 +284,14 @@ function openApp(url) {
     ? [browser, [`--app=${url}`]]
     : win ? ['cmd', ['/c', 'start', '', url]]          // no Chromium — plain tab
       : process.platform === 'darwin' ? ['open', [url]] : ['xdg-open', [url]];
+
+  // Safari has no --app equivalent, so the fallback there is an ordinary tab.
+  // Say so, and point at the one native way to get a real window.
+  if (!browser && process.platform === 'darwin') {
+    console.log('[paperr] No Chrome/Edge/Brave found, so this opens as a Safari tab.');
+    console.log('         For a proper app window: in Safari use File > Add to Dock');
+    console.log('         (macOS 14+), or install Chrome/Edge and launch paperr again.');
+  }
   // Headless boxes and WSL have no opener at all, and an unhandled ENOENT
   // would take the whole launch down — print the URL and carry on.
   const child = spawn(cmd, args, { detached: true, stdio: 'ignore' });
@@ -218,7 +314,10 @@ function npmRun(script, label) {
 // also writes server/.env with real JWT secrets, via install:all -> setup:env.
 function ensureInstalled() {
   if (['server', 'client'].every((d) => fs.existsSync(path.join(root, d, 'node_modules')))) return;
-  console.log('[paperr] First run — installing dependencies. This takes a few minutes.\n');
+  console.log('[paperr] First run — installing dependencies. This takes a few minutes.');
+  console.log(`         Server packages go into ${path.join(root, 'server', 'node_modules')}`);
+  console.log(`         Client packages go into ${path.join(root, 'client', 'node_modules')}`);
+  console.log(`         Your config (with fresh secrets) is written to ${path.join(root, 'server', '.env')}\n`);
   npmRun('install:all', 'Dependency install');
 }
 
@@ -230,7 +329,7 @@ function startServer(port, dev) {
     return;
   }
   if (!fs.existsSync(path.join(root, 'client', 'dist', 'index.html'))) {
-    console.log('[paperr] Building the client (first run only)...');
+    console.log(`[paperr] Building the app into ${path.join(root, 'client', 'dist')} (first run only)...`);
     npmRun('build', 'Client build');
   }
   // NODE_ENV here rather than in .env: dotenv won't override the process env,
@@ -296,7 +395,11 @@ async function main() {
     console.log(' ready.');
   }
 
-  if (!dev) ensureDesktopEntry();
+  // Always, not just !dev: whichever shortcut ran first is responsible for
+  // creating both, so the one a person never clicked still shows up.
+  await ensureDesktopEntry();
+
+  console.log('[paperr] Opening paperr in your browser...');
   openApp(url);
 
   console.log(`\n  This device : ${url}`);
@@ -311,4 +414,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { readPort, icoFrom, winShortcutScript, winUninstallScript, UNINSTALL_KEY };
+module.exports = { readPort, icoFrom, winShortcutScript, winUninstallScript, UNINSTALL_KEY, SHORTCUTS, slug };

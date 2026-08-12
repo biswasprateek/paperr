@@ -9,11 +9,16 @@ const execFileP = promisify(execFile);
 const ROOT = path.join(__dirname, '..', '..');
 const NPM = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 
-const git = (...args) => execFileP('git', args, { cwd: ROOT }).then(r => r.stdout.trim());
+// windowsHide because the server may have no console of its own (launch.js
+// starts it detached), and git/npm are console programs — without it Windows
+// pops a new console window for every call. Node defaults it to false.
+const git = (...args) => execFileP('git', args, { cwd: ROOT, windowsHide: true }).then(r => r.stdout.trim());
 // .cmd shims need a shell on Windows (same as scripts/launch.js); no user input
 // reaches either call, every argument here is a literal.
 const npm = (args, cwd) =>
-  execFileP(NPM, args, { cwd, shell: process.platform === 'win32', maxBuffer: 10 * 1024 * 1024 });
+  execFileP(NPM, args, {
+    cwd, shell: process.platform === 'win32', windowsHide: true, maxBuffer: 10 * 1024 * 1024,
+  });
 
 // Which workspaces need `npm install`, and does the client bundle need a rebuild?
 // changed === null means the diff couldn't be read — redo everything rather than

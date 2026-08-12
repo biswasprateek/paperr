@@ -11,15 +11,40 @@ Download the file for your OS and double-click it. First run installs paperr to
 
 Needs **Node 22.5+** and **git** — the script links you to them if they're missing.
 
-What it does: downloads the bootstrap from the repo, clones paperr, installs
-deps, generates `server/.env` with real JWT secrets, builds the client, starts
-the server, and adds a desktop entry (Desktop shortcut / `~/Applications/
-paperr.app` / `.desktop` file) — then opens the app.
+What it does: runs `npx paperr@latest`, which clones the repo, installs deps,
+generates `server/.env` with real JWT secrets, builds the client, starts the
+server, and adds **two** desktop entries (Desktop shortcut + Start Menu on
+Windows, `~/Applications/*.app` on macOS, `.desktop` files on Linux) — then
+opens the app:
 
-That desktop entry is the everyday path. It re-runs the same launcher, which
+| Shortcut            | Runs                                                        |
+| -------------------- | ------------------------------------------------------------ |
+| `paperr`             | The dev servers (API :3000, client :5173) — for working on the code |
+| `paperr LAN Server`  | The production build, reachable by other devices on the network    |
+
+Both point at the same `~/paperr` install — whichever you run first creates
+both shortcuts, so the one you haven't clicked yet still shows up. Clicking
+either just decides how the server for that install starts.
+
+Delivery goes through npm on purpose: every install registers as a download on
+the `paperr` package, which is the only way to see how many there are. It also
+means **a new npm version has to be published** before any change to
+`npm/bin/paperr.js` reaches a user.
+
+Those shortcuts are the everyday path. Each re-runs the same launcher, which
 starts the server only if it isn't already up, then opens paperr in a chromeless
-Chrome/Edge window — an app window with its own icon, no browser chrome, nothing
-extra installed. No code signing involved anywhere, on any platform.
+Chrome/Edge window — no browser chrome, nothing extra installed, and no code
+signing involved anywhere on any platform. Only `paperr LAN Server` prints a
+network address other devices can use; the dev shortcut is localhost-only.
+
+The **taskbar** button for that window shows Edge's or Chrome's icon, not
+paperr's: the window is a browser process, and Windows takes taskbar identity
+from the browser. The favicon only sets the window icon. To get a real paperr
+taskbar entry, open `http://localhost:3000` in Edge and use **… → Apps → Install
+paperr** — installed web apps get their own icon and identity. The trade-off is
+that launching the installed app does *not* start the server, so start paperr
+from the shortcut first, or keep using the shortcut alone and live with the
+browser icon.
 
 ```Shell
 npm run app            # from inside an existing checkout
@@ -30,16 +55,32 @@ npx paperr             # from a terminal, OUTSIDE any paperr checkout
 `npx paperr` must not be run from inside a checkout: npm walks up looking for a
 local package named `paperr`, finds the repo's own `package.json` (which has no
 `bin`), and gives up with "could not determine executable to run". The one-click
-files avoid npm entirely for that reason.
+files `cd` to your home folder first so they can't hit this.
 
 Updating: `git pull` in `~/paperr`, then launch normally — the launcher rebuilds
 only when `client/dist` is missing, so delete it first if the UI looks stale.
 
+### macOS without Chrome or Edge
+
+Safari has no `--app` equivalent, so paperr opens as an ordinary Safari tab
+rather than its own window. Two ways to get a real app window: install Chrome,
+Edge or Brave (the launcher picks any of them up from `/Applications` or
+`~/Applications`), or use Safari's **File → Add to Dock** on macOS 14+, which
+turns paperr into a proper web app using the name and icon from the manifest.
+
 ## Uninstalling
 
-Windows registers paperr in **Settings → Installed apps**, so it uninstalls from
-there like anything else. macOS and Linux have no equivalent registry, so run it
-by hand from the install folder:
+Double-click the file for your OS — it asks whether to delete your data too, and
+defaults to keeping it:
+
+| OS      | File                       |
+| ------- | -------------------------- |
+| Windows | `uninstall-windows.cmd`  |
+| macOS   | `uninstall-macos.command` |
+| Linux   | `uninstall-linux.sh`     |
+
+Windows also lists paperr in **Settings → Installed apps**, which runs exactly
+the same uninstaller. Or from the install folder:
 
 ```Shell
 npm run uninstall            # stops the server, removes shortcuts / .app / .desktop

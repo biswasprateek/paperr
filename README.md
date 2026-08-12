@@ -289,7 +289,9 @@ Still needs **Node 22.5+** and **git** — the file links you to them if either 
 
 From an existing checkout, `npm run app` does the same thing (`npm run app -- --dev` for the dev servers).
 
-**Uninstalling:** Windows registers paperr in **Settings → Installed apps**. macOS and Linux have no equivalent, so run `npm run uninstall` from the install folder. Either way your database, uploads and backups are left untouched — add `--purge` to delete those as well.
+On macOS without Chrome/Edge/Brave installed, Safari has no `--app` equivalent, so paperr opens as a normal tab — use Safari's **File → Add to Dock** (macOS 14+) for a real app window, or install a Chromium-based browser.
+
+**Uninstalling:** double-click `install/uninstall-windows.cmd` / `uninstall-macos.command` / `uninstall-linux.sh`, which asks whether to remove your data and defaults to keeping it. Windows also lists paperr in **Settings → Installed apps**. From a terminal it's `npm run uninstall` in the install folder, plus `-- --purge` to delete the database, uploads and backups as well.
 
 Full detail, including the failure modes: [`install/README.md`](install/README.md).
 

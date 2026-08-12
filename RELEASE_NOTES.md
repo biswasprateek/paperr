@@ -2,27 +2,46 @@
 
 _2026-08-11_
 
-An install-and-update release. paperr can now be installed by double-clicking one file on Windows, macOS, or Linux, launches from a real desktop/Start-Menu entry into its own app window, updates itself from Settings, and uninstalls cleanly. Plus archivable habits, and a typography pass across the app.
+An install-and-update release. paperr can now be installed by double-clicking one file on Windows, macOS, or Linux, launches from real desktop/Start-Menu entries into its own app window, installs as a proper web app, updates itself from Settings, and uninstalls by double-clicking one file too. Plus archivable habits, and a typography pass across the app.
 
 ## Highlights
 
 ### 🧪 One-click installers (experimental)
 
-Three downloadable files — [`install/paperr-windows.cmd`](install/paperr-windows.cmd), [`install/paperr-macos.command`](install/paperr-macos.command), [`install/paperr-linux.sh`](install/paperr-linux.sh) — take a non-technical user from nothing to a running paperr in one double-click. Each checks for Node 22.5+ and git (linking to the download page if either is missing), then pulls the bootstrap from the repo rather than npm, so the file never goes stale and a new release needs no `npm publish`.
+Three downloadable files — [`install/paperr-windows.cmd`](install/paperr-windows.cmd), [`install/paperr-macos.command`](install/paperr-macos.command), [`install/paperr-linux.sh`](install/paperr-linux.sh) — take a non-technical user from nothing to a running paperr in one double-click. Each opens with an ASCII paperr banner, checks for Node 22.5+ and git (linking to the download page if either is missing), then runs `npx -y paperr@latest`.
 
-First run clones paperr to `~/paperr` (`%USERPROFILE%\paperr` on Windows), installs dependencies, generates `server/.env` with real JWT secrets, builds the client, starts the server on `:3000`, and opens the app. Every run after that just starts it.
+First run clones paperr to `~/paperr` (`%USERPROFILE%\paperr` on Windows), installs dependencies, generates `server/.env` with real JWT secrets, builds the client, starts the server on `:3000`, and opens the app. Every run after that just starts it. Each step now says where it's putting things — the checkout, `server/node_modules`, `client/node_modules`, `server/.env`, `client/dist` — instead of going quiet for several minutes.
+
+Delivery goes through npm rather than a direct download of the bootstrap, so every install registers on the `paperr` package's download stats. The trade-off is that a change to `npm/bin/paperr.js` now needs an `npm publish` before it reaches anyone. Each file also `cd`s to your home folder before calling npx: run from inside a checkout, npm walks up, finds the repo's own `package.json` (named `paperr`, but with no `bin`), and dies with "could not determine executable to run".
 
 > **Experimental — not the supported path yet.** Verified end to end on Windows and Linux; macOS is untested. The documented `git clone` + `npm run install:all` steps remain the recommended way to install paperr.
 
+### Two shortcuts, one install
+
+Installing creates **two** entries, not one, on every platform (Desktop + Start Menu on Windows, `~/Applications/*.app` on macOS, `.desktop` files on Linux):
+
+| Shortcut            | Runs                                                                 |
+| ------------------- | -------------------------------------------------------------------- |
+| `paperr`            | The dev servers (API `:3000`, client `:5173`) — for working on the code |
+| `paperr LAN Server` | The production build, reachable by other devices on the network        |
+
+Both point at the same install and differ only in how they start the server, and whichever one you run creates both — so the one you've never clicked still shows up. Only `paperr LAN Server` prints a network address; the dev shortcut is localhost-only. The list lives in one place in [`scripts/launch.js`](scripts/launch.js) and is shared by all three platform builders and the uninstaller, so the two can't drift apart.
+
 ### Desktop app entry, without Electron
 
-[`scripts/launch.js`](scripts/launch.js) is a single idempotent launcher: it starts the server only if it isn't already answering, creates a desktop entry (Desktop shortcut + Start Menu on Windows, `~/Applications/paperr.app` on macOS, `.desktop` on Linux), then opens paperr in a chromeless Chrome/Edge/Brave window via `--app=` — an app window with its own icon and taskbar entry, with no bundled browser and nothing installed system-wide. Falls back to a normal tab when no Chromium-family browser is present, and prints the URL when there's no opener at all (headless boxes, WSL). Desktop entries are rewritten on every launch, so one pointing at a moved or deleted checkout repairs itself. Also reachable from an existing checkout as `npm run app` (`npm run app -- --dev` for the dev servers).
+[`scripts/launch.js`](scripts/launch.js) is a single idempotent launcher: it starts the server only if it isn't already answering, creates the desktop entries, then opens paperr in a chromeless Chrome/Edge/Brave window via `--app=` — an app window with its own icon, with no bundled browser and nothing installed system-wide. Falls back to a normal tab when no Chromium-family browser is present, and prints the URL when there's no opener at all (headless boxes, WSL). Entries are rewritten on every launch, so one pointing at a moved or deleted checkout repairs itself. Also reachable from an existing checkout as `npm run app` (`npm run app -- --dev` for the dev servers).
+
+Browser discovery on macOS now searches `~/Applications` as well as `/Applications`, and recognises Vivaldi and plain Chromium alongside Chrome/Edge/Brave. With none of them installed, paperr opens as an ordinary Safari tab — Safari has no `--app` equivalent — and the launcher now says so, pointing at Safari's **File → Add to Dock** (macOS 14+) as the native way to get a real window.
 
 The launcher records the server PID and logs to `paperr.log`, and reports both the local and LAN URLs on start — preferring a genuine `192.168.x`/`10.x` address over docker0 and WSL bridges.
 
+### Installable as a web app
+
+A web app manifest ([`client/public/manifest.webmanifest`](client/public/manifest.webmanifest)) gives paperr its own name, icon, and standalone display mode when installed from the browser — Edge/Chrome's **… → Apps → Install paperr**, Safari's **Add to Dock**, or **Add to Home Screen** on a tablet. Worth knowing before you reach for it: the taskbar button for a `--app=` window shows Edge's or Chrome's icon, because that window is a browser process and Windows takes taskbar identity from the browser. Installing as a web app fixes the icon but does *not* start the server, so the shortcut still has to run first. Both sides of that trade-off are written up in [`install/README.md`](install/README.md).
+
 ### Uninstall
 
-Windows registers paperr under **Settings → Installed apps** (HKCU, so no admin rights), with a working Uninstall button. macOS and Linux have no equivalent registry, so `npm run uninstall` does the same job by hand: stops the server, removes shortcuts / the `.app` / the `.desktop` file. Your database, uploads and backups are deliberately left in place — the uninstaller prints where they are. `npm run uninstall -- --purge` deletes those too.
+Three more double-clickable files — [`install/uninstall-windows.cmd`](install/uninstall-windows.cmd), [`install/uninstall-macos.command`](install/uninstall-macos.command), [`install/uninstall-linux.sh`](install/uninstall-linux.sh) — stop the server and remove every shortcut. Each asks whether to delete your data as well and **defaults to no**: it's a household's notes and uploads, and none of it is recoverable. Windows additionally registers paperr under **Settings → Installed apps** (HKCU, so no admin rights), whose Uninstall button runs the same script. From a terminal it's still `npm run uninstall` in the install folder, plus `-- --purge` to delete the database, uploads and backups too.
 
 ### In-app updates
 
@@ -46,17 +65,25 @@ Small-caps labels are gone. Across forms, table headers, modals, buttons, widget
 
 ### App icon on every surface
 
-Raster favicons (16/32/512) alongside the SVG, since Chromium app windows and home-screen installs use the PNGs for the window, taskbar, and launcher icon — not the SVG. The launcher derives a Windows `.ico` from the 512px PNG at runtime (Vista+ reads PNG-compressed icon entries directly), and macOS converts the same file to `.icns` with the built-in `sips`.
+Raster favicons (16/32/512) alongside the SVG, since Chromium app windows and home-screen installs use the PNGs for the window, taskbar, and launcher icon — not the SVG. The launcher derives a Windows `.ico` from the 512px PNG at runtime (Vista+ reads PNG-compressed icon entries directly).
+
+macOS gets a full icon pipeline rather than one image. A single-representation `.icns` is what makes Launchpad look pixelated — it upscales whatever lone size it finds — so the launcher now renders a complete `.iconset` (16/32/128/256/512, each at 1x and 2x) and compiles it with `iconutil`. Sizes come from `favicon.svg` via `sharp`, which is already a server dependency and has librsvg built in, so 1024px is genuinely sharp instead of an upscaled bitmap; without sharp it falls back to `sips` downscaling the 512 PNG, and failing that to the old single-image conversion. A version stamp in the bundle makes existing installs regenerate their icon instead of keeping whatever the previous version produced.
 
 ### Docs
 
-README trimmed: the long per-feature screenshot gallery collapsed into a single carousel, npm install instructions replaced by the one-click section, and the experimental installers documented with their failure modes. Full detail, including what happens when each step fails, lives in [`install/README.md`](install/README.md).
+README trimmed: the long per-feature screenshot gallery collapsed into a single carousel, npm install instructions replaced by the one-click section, and the experimental installers documented with their failure modes. [`install/README.md`](install/README.md) covers the rest — the two shortcuts and what each starts, why delivery goes through npm, the browser-vs-paperr taskbar icon trade-off, macOS without a Chromium browser, and the uninstallers.
 
 ## Fixes
 
+- Windows stopped popping console windows. The server is started detached and so has no console of its own; every `execFile`/`spawn` under it inherited Node's `windowsHide: false` default, which handed each child a brand-new console — visibly, once every few seconds for the bundled AI server's memory poll, and again on every git/npm call during a self-update. Fixed at the source in [`server/ai/litertSupervisor.js`](server/ai/litertSupervisor.js) and [`server/services/updateService.js`](server/services/updateService.js), so it covers the model import and every update step, not just the poll.
+- Uninstalling on macOS left a ghost icon in Launchpad. Deleting the `.app` doesn't update the LaunchServices database that Launchpad indexes from, so the uninstaller now also unregisters the path with `lsregister -u` — after the delete, never before: it hands the unregister to a daemon rather than committing inline, and running it first can re-register the bundle instead of dropping it.
 - `.gitattributes` now pins line endings per launcher type (`*.cmd`/`*.ps1` CRLF, `*.sh`/`*.command` LF) — a shell script checked out with CRLF fails to run at all.
 - CONTRIBUTING's dev setup told you to `cd paperr-dev` after cloning into `paperr`.
 - `npm run app` on Windows no longer emits Node's DEP0190 warning about unescaped shell arguments.
+
+## Tests
+
+`scripts/launch.test.js` now builds both real `.lnk` files in a temp folder and reads them back, asserting each lands in both shortcut folders with the right `--dev` argument and repairs itself when left pointing somewhere stale. Windows-only; skipped elsewhere.
 
 ## Dependencies
 

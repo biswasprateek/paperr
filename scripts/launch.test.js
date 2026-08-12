@@ -6,7 +6,7 @@ const os = require('node:os');
 const path = require('node:path');
 
 const { spawnSync } = require('node:child_process');
-const { readPort, icoFrom, winShortcutScript, winUninstallScript } = require('./launch.js');
+const { readPort, icoFrom, winShortcutScript, winUninstallScript, SHORTCUTS } = require('./launch.js');
 
 test('readPort: env wins, then server/.env, then 3000', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'paperr-'));
@@ -31,8 +31,10 @@ test('icoFrom: valid ICONDIR pointing past the header', () => {
 });
 
 // The shortcut script is a hand-built PowerShell string, so quoting bugs are
-// the likely failure. Build a real .lnk in a temp dir and read it back.
-test('winShortcutScript: writes a usable shortcut to every folder', { skip: process.platform !== 'win32' }, () => {
+// the likely failure. Build real .lnk files in a temp dir and read them back.
+// One install makes two shortcuts — dev servers vs. the production build — so
+// this checks both land in both folders with the right --dev argument.
+test('winShortcutScript: writes both shortcuts to every folder', { skip: process.platform !== 'win32' }, () => {
   const base = fs.mkdtempSync(path.join(os.tmpdir(), 'paperr-lnk-'));
   const desktop = path.join(base, 'Desktop');
   const programs = path.join(base, 'Programs');
@@ -45,14 +47,16 @@ test('winShortcutScript: writes a usable shortcut to every folder', { skip: proc
   assert.equal(made.stderr.trim(), '', 'PowerShell reported no errors');
 
   for (const dir of [desktop, programs]) {
-    const lnk = path.join(dir, 'paperr.lnk');
-    assert.ok(fs.existsSync(lnk), `shortcut created in ${path.basename(dir)}`);
+    for (const { name, dev } of SHORTCUTS) {
+      const lnk = path.join(dir, `${name}.lnk`);
+      assert.ok(fs.existsSync(lnk), `${name} shortcut created in ${path.basename(dir)}`);
 
-    const read = ps(`$s = (New-Object -ComObject WScript.Shell).CreateShortcut('${lnk}'); $s.TargetPath; $s.Arguments; $s.IconLocation`);
-    const [target, args, icon] = read.stdout.trim().split(/\r?\n/);
-    assert.equal(target, process.execPath);
-    assert.equal(args, `"${path.join(__dirname, 'launch.js')}"`);
-    assert.ok(icon.startsWith(ico), `icon points at the .ico (got ${icon})`);
+      const read = ps(`$s = (New-Object -ComObject WScript.Shell).CreateShortcut('${lnk}'); $s.TargetPath; $s.Arguments; $s.IconLocation`);
+      const [target, args, icon] = read.stdout.trim().split(/\r?\n/);
+      assert.equal(target, process.execPath);
+      assert.equal(args, `"${path.join(__dirname, 'launch.js')}"${dev ? ' --dev' : ''}`);
+      assert.ok(icon.startsWith(ico), `icon points at the .ico (got ${icon})`);
+    }
   }
 
   // Re-running must repair a shortcut left pointing somewhere stale.
@@ -60,7 +64,7 @@ test('winShortcutScript: writes a usable shortcut to every folder', { skip: proc
   ps(`$s = (New-Object -ComObject WScript.Shell).CreateShortcut('${lnk}'); $s.Arguments = '"C:\\gone\\launch.js"'; $s.Save()`);
   ps(winShortcutScript(ico, `@('${desktop}')`));
   const after = ps(`(New-Object -ComObject WScript.Shell).CreateShortcut('${lnk}').Arguments`);
-  assert.equal(after.stdout.trim(), `"${path.join(__dirname, 'launch.js')}"`, 'stale shortcut repaired');
+  assert.equal(after.stdout.trim(), `"${path.join(__dirname, 'launch.js')}" --dev`, 'stale shortcut repaired');
 });
 
 // Written into a scratch HKCU key, never the real one — the values are
