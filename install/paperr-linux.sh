@@ -21,7 +21,7 @@ cat <<'BANNER'
                        :
 
  A private, self-hosted platform for you, your household or team — tasks, projects, 
- calendar, notes, routines,focus tools, a shared wall dashboard, 
+ calendar, notes, routines, focus tools, a shared wall dashboard,
  and a built-in AI assistant & agents, all running on your own network.
 
 BANNER

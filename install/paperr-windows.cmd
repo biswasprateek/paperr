@@ -17,9 +17,12 @@ echo                      ..+++.
 echo                        .+:
 echo                         :
 echo.
-echo A private, self-hosted platform for you, your household or team — tasks, projects, 
-echo calendar, notes, routines,focus tools, a shared wall dashboard, 
-echo and a built-in AI assistant & agents, all running on your own network.
+REM Plain ASCII and ^-escaped ampersands only: cmd renders this file in the OEM
+REM code page, so an em dash arrives as mojibake, and a bare ^& ends the echo
+REM and runs the rest of the line as a command.
+echo A private, self-hosted platform for you, your household or team - tasks,
+echo projects, calendar, notes, routines, focus tools, a shared wall dashboard,
+echo and a built-in AI assistant ^& agents, all running on your own network.
 echo.
 
 where node >nul 2>nul

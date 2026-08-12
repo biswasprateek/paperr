@@ -113,7 +113,11 @@ function winShortcut() {
   const icon = icoPath();
   // One PowerShell start-up covers both — it is the slow part, not the writes.
   const ps = `${winShortcutScript(icon)}\n${winUninstallScript(icon)}`;
-  spawnSync('powershell', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', ps], { stdio: 'ignore' });
+  const r = spawnSync('powershell', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', ps], { encoding: 'utf8' });
+  // spawnSync throws for neither a missing powershell (.error) nor a failed
+  // script (.status), so without this the entries silently never appear.
+  if (r.error) throw r.error;
+  if (r.status !== 0) throw new Error(r.stderr.trim() || `powershell exited ${r.status}`);
 }
 
 // A single-image .icns is what makes Launchpad look pixelated — it upscales
@@ -152,11 +156,13 @@ async function makeIcns(dest) {
         }
       }
     }
-    if (spawnSync('iconutil', ['-c', 'icns', set, '-o', dest], { stdio: 'ignore' }).status === 0) return true;
+    // Returns whether this is the sharp-rendered icon, i.e. the one worth
+    // stamping as final — not merely whether a file got written.
+    if (spawnSync('iconutil', ['-c', 'icns', set, '-o', dest], { stdio: 'ignore' }).status === 0) return vector;
 
     // Last resort: the old single-image conversion. Blurry, but an icon.
     spawnSync('sips', ['-s', 'format', 'icns', logoPng, '--out', dest], { stdio: 'ignore' });
-    return fs.existsSync(dest);
+    return false;
   } catch (err) {
     console.warn(`[paperr] Icon generation failed (${err.message}) — using the generic icon.`);
     return false;
@@ -198,8 +204,10 @@ async function macApps() {
     const icns = path.join(app, 'Contents', 'Resources', 'paperr.icns');
     const stamp = path.join(app, 'Contents', 'Resources', '.icon-v2');
     if (!fs.existsSync(stamp) || !fs.existsSync(icns)) {
-      await makeIcns(icns);
-      fs.writeFileSync(stamp, '');
+      // sharp lives in server/node_modules, so entries built before the first
+      // install fall back to the blurry sips path — leave that unstamped so the
+      // next launch regenerates it properly.
+      if (await makeIcns(icns)) fs.writeFileSync(stamp, '');
       // Launchpad and the Dock cache icons hard; without this the old one sticks.
       spawnSync('touch', [app], { stdio: 'ignore' });
       iconChanged = true;
@@ -364,6 +372,14 @@ async function main() {
   const port = readPort(root);
   const url = `http://localhost:${dev ? '5173' : port}`;
 
+  // Before the server work, not after. The entries only need to point back at
+  // this file, and every failure below returns early — a first run that dies in
+  // npm install, or finds the port busy, would otherwise leave a fresh clone
+  // with no shortcuts at all, which is the one thing a one-click install owes.
+  // Always, not just !dev: whichever shortcut ran first creates both, so the
+  // one a person never clicked still shows up.
+  await ensureDesktopEntry();
+
   // Readiness probes / rather than /api/health: the API answers in either mode,
   // but the client bundle is only served when NODE_ENV=production, so a dev
   // server on the same port would otherwise look "up" and open an error window.
@@ -394,10 +410,6 @@ async function main() {
     }
     console.log(' ready.');
   }
-
-  // Always, not just !dev: whichever shortcut ran first is responsible for
-  // creating both, so the one a person never clicked still shows up.
-  await ensureDesktopEntry();
 
   console.log('[paperr] Opening paperr in your browser...');
   openApp(url);
