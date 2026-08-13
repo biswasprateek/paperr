@@ -64,6 +64,9 @@ async function apply({ force = false } = {}) {
 
   // ponytail: no auto-restart — the pulled server code only runs once paperr is
   // relaunched. Respawn the process here if one-click updates must be zero-touch.
+  // The next launch sees HEAD ahead of scripts/launch.js's .paperr-build stamp,
+  // so it restarts the server (wanted) but repeats this install/build (not).
+  // Stamp it here too if that second build ever costs more than it's worth.
   return { ...status, current: status.latest, updateAvailable: false, updated: true, restartRequired: true };
 }
 

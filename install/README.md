@@ -1,7 +1,8 @@
 # One-click install
 
 Download the file for your OS and double-click it. First run installs paperr to
-`~/paperr` (Windows: `%USERPROFILE%\paperr`); every run after that just starts it.
+`~/paperr` (Windows: `%USERPROFILE%\paperr`); every run after that updates it to
+the latest release and starts it.
 
 | OS      | File                     | First-run note                                  |
 | ------- | ------------------------ | ----------------------------------------------- |
@@ -60,8 +61,12 @@ local package named `paperr`, finds the repo's own `package.json` (which has no
 `bin`), and gives up with "could not determine executable to run". The one-click
 files `cd` to your home folder first so they can't hit this.
 
-Updating: `git pull` in `~/paperr`, then launch normally — the launcher rebuilds
-only when `client/dist` is missing, so delete it first if the UI looks stale.
+Updating: nothing to do — every run pulls the repo before starting, and the
+launcher notices the commit changed, so it reinstalls dependencies, rebuilds the
+client and restarts a server that's already up. (`node_modules` and `client/dist`
+are gitignored, so without that check a pull would keep serving the old build.)
+A checkout with local edits to tracked files can't fast-forward: it says so and
+starts the version you have. Settings → Updates does the same from inside the app.
 
 ### macOS without Chrome or Edge
 

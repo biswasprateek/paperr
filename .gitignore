@@ -11,6 +11,7 @@ certs/
 Thumbs.db
 paperr.log
 paperr.pid
+.paperr-build
 paperr.ico
 /.claude
 /.agents

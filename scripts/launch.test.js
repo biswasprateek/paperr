@@ -6,7 +6,20 @@ const os = require('node:os');
 const path = require('node:path');
 
 const { spawnSync } = require('node:child_process');
-const { readPort, icoFrom, winShortcutScript, winUninstallScript, SHORTCUTS } = require('./launch.js');
+const { readPort, icoFrom, winShortcutScript, winUninstallScript, SHORTCUTS, movedSinceBuild } = require('./launch.js');
+
+// Deciding wrong here is the whole "I updated and nothing changed" bug: node_modules
+// and client/dist are gitignored, so only this stamp knows the build is behind.
+test('movedSinceBuild: true until the stamp matches the current commit', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'paperr-stamp-'));
+  const stamp = path.join(dir, '.paperr-build');
+
+  assert.equal(movedSinceBuild(dir, 'abc123'), true, 'no stamp — an install from before this check');
+  fs.writeFileSync(stamp, 'abc123\n');
+  assert.equal(movedSinceBuild(dir, 'abc123'), false, 'already built at this commit');
+  assert.equal(movedSinceBuild(dir, 'def456'), true, 'a pull moved HEAD');
+  assert.equal(movedSinceBuild(dir, ''), false, 'not a clone — nothing to compare');
+});
 
 test('readPort: env wins, then server/.env, then 3000', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'paperr-'));

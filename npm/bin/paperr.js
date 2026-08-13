@@ -23,33 +23,41 @@ if (major < 22 || (major === 22 && minor < 5)) {
   process.exit(1);
 }
 
-function run(cmd, cmdArgs, cwd) {
+// optional: report the failure instead of exiting, for steps a run can survive.
+function run(cmd, cmdArgs, cwd, optional) {
   const r = spawnSync(cmd, cmdArgs, { cwd, stdio: "inherit" });
+  const failed = Boolean(r.error) || r.status !== 0;
+  if (!failed || optional) return !failed;
   if (r.error) {
     console.error(`paperr: could not run ${cmd} — ${r.error.message}`);
     process.exit(1);
   }
-  if (r.status !== 0) process.exit(r.status);
+  process.exit(r.status);
 }
 
 const launcher = path.join(dir, "scripts", "launch.js");
 
-if (!existsSync(launcher)) {
-  if (existsSync(path.join(dir, ".git"))) {
-    // A checkout from before the launcher existed, or just behind — update it
-    // in place rather than making people delete and re-clone.
-    console.log(`[paperr] Updating your existing install in ${dir}...`);
-    run("git", ["pull", "--ff-only"], dir);
-  } else if (existsSync(dir)) {
-    // Usually a clone that was interrupted partway; git won't clone into it.
-    console.error(`"${dir}" exists but isn't a complete paperr checkout.`);
-    console.error("Delete it and run this again, or pass another directory.");
-    process.exit(1);
-  } else {
-    console.log(`[paperr] Downloading paperr into ${dir} (a one-time step)...`);
-    run("git", ["clone", "--depth", "1", REPO, dir]);
+if (existsSync(path.join(dir, ".git"))) {
+  // Every run, not just when the launcher is missing: an existing checkout used
+  // to be left alone entirely, so it kept starting whatever code it was first
+  // cloned at no matter how many releases had shipped since.
+  console.log(`[paperr] Updating your existing install in ${dir}...`);
+  if (!run("git", ["pull", "--ff-only"], dir, true)) {
+    // Offline, or the checkout has local commits/edits. Neither is a reason to
+    // refuse to start what's already installed.
+    console.warn("[paperr] Couldn't update — starting the version you have.");
   }
+} else if (!existsSync(dir)) {
+  console.log(`[paperr] Downloading paperr into ${dir} (a one-time step)...`);
+  run("git", ["clone", "--depth", "1", REPO, dir]);
+} else if (!existsSync(launcher)) {
+  // Usually a clone that was interrupted partway; git won't clone into it.
+  console.error(`"${dir}" exists but isn't a complete paperr checkout.`);
+  console.error("Delete it and run this again, or pass another directory.");
+  process.exit(1);
 }
+// A complete copy that isn't a clone (a downloaded zip) falls through: nothing
+// to update, but it still starts.
 
 if (!existsSync(launcher)) {
   // Clear message beats the "Cannot find module" node would throw below.

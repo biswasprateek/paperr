@@ -330,14 +330,43 @@ function npmRun(script, label) {
   if (r.status !== 0) throw new Error(`${label} failed — see the output above.`);
 }
 
+// node_modules and client/dist are both gitignored, so a `git pull` that brings
+// a new version leaves them behind at the old one — the app would start on
+// stale dependencies and serve the previously built bundle. Stamping the commit
+// each install was set up at is what makes an update actually take effect.
+// Empty head means this isn't a clone (a downloaded zip); nothing to compare.
+const stampFile = (dir) => path.join(dir, '.paperr-build');
+
+function gitHead(dir) {
+  const r = spawnSync('git rev-parse HEAD', { cwd: dir, shell: true, encoding: 'utf8' });
+  return r.status === 0 ? r.stdout.trim() : '';
+}
+
+// No stamp at all means an install that predates this check: treat it as moved,
+// which costs one refresh and unsticks everyone already sitting on old code.
+function movedSinceBuild(dir, commit) {
+  const file = stampFile(dir);
+  return Boolean(commit) && (!fs.existsSync(file) || fs.readFileSync(file, 'utf8').trim() !== commit);
+}
+
+const head = gitHead(root);
+const moved = movedSinceBuild(root, head);
+const stampBuild = () => head && fs.writeFileSync(stampFile(root), head);
+
 // A fresh clone has no node_modules, so building or serving would fail. This
-// also writes server/.env with real JWT secrets, via install:all -> setup:env.
+// also writes server/.env with real JWT secrets, via install:all -> setup:env
+// (which leaves an existing .env alone, so it is safe on every later update).
 function ensureInstalled() {
-  if (['server', 'client'].every((d) => fs.existsSync(path.join(root, d, 'node_modules')))) return;
-  console.log('[paperr] First run — installing dependencies. This takes a few minutes.');
-  console.log(`         Server packages go into ${path.join(root, 'server', 'node_modules')}`);
-  console.log(`         Client packages go into ${path.join(root, 'client', 'node_modules')}`);
-  console.log(`         Your config (with fresh secrets) is written to ${path.join(root, 'server', '.env')}\n`);
+  const missing = !['server', 'client'].every((d) => fs.existsSync(path.join(root, d, 'node_modules')));
+  if (!missing && !moved) return;
+  if (missing) {
+    console.log('[paperr] First run — installing dependencies. This takes a few minutes.');
+    console.log(`         Server packages go into ${path.join(root, 'server', 'node_modules')}`);
+    console.log(`         Client packages go into ${path.join(root, 'client', 'node_modules')}`);
+    console.log(`         Your config (with fresh secrets) is written to ${path.join(root, 'server', '.env')}\n`);
+  } else {
+    console.log('[paperr] New version downloaded — updating dependencies.\n');
+  }
   npmRun('install:all', 'Dependency install');
 }
 
@@ -345,13 +374,19 @@ function startServer(port, dev) {
   ensureInstalled();
   if (dev) {
     // Dev wants the logs, so this one stays attached; Ctrl+C stops both halves.
+    // Vite serves from source, so there is no bundle to go stale — stamp anyway
+    // or every dev launch would reinstall dependencies.
+    stampBuild();
     spawn('npm run dev', { cwd: root, stdio: 'inherit', shell: true });
     return;
   }
-  if (!fs.existsSync(path.join(root, 'client', 'dist', 'index.html'))) {
-    console.log(`[paperr] Building the app into ${path.join(root, 'client', 'dist')} (first run only)...`);
+  if (moved || !fs.existsSync(path.join(root, 'client', 'dist', 'index.html'))) {
+    console.log(`[paperr] Building the app into ${path.join(root, 'client', 'dist')} — this takes a minute...`);
     npmRun('build', 'Client build');
   }
+  // After the build, never before: a build that fails exits here, and the next
+  // run has to try again rather than assume this version is ready to serve.
+  stampBuild();
   // NODE_ENV here rather than in .env: dotenv won't override the process env,
   // so .env stays on development for normal dev work (same trick as start-paperr.*).
   const log = fs.openSync(path.join(root, 'paperr.log'), 'a');
@@ -398,7 +433,36 @@ async function main() {
   const probe = (u) => fetch(u, { signal: AbortSignal.timeout(1500) }).then((r) => r.ok, () => false);
   const ready = () => probe(url);
 
-  if (await ready()) {
+  let running = await ready();
+
+  // The update the bootstrap just pulled is only on disk — the process
+  // answering here is still the old version, and leaving it alone is why a
+  // re-run used to look like nothing had changed. Stop it and start again.
+  // Not in dev: paperr.pid records the detached production server, while a dev
+  // run answers on :5173 and writes no pid — killing what's in that file would
+  // be killing something else entirely. Vite reloads from source anyway.
+  if (running && moved && !dev) {
+    console.log('[paperr] A new version was downloaded — restarting to use it.');
+    const pidFile = path.join(root, 'paperr.pid');
+    const pid = fs.existsSync(pidFile) && Number(fs.readFileSync(pidFile, 'utf8').trim());
+    try {
+      if (!pid) throw new Error('no recorded pid');
+      process.kill(pid);
+      fs.rmSync(pidFile, { force: true });
+      // The port takes a moment to come free; starting into it hits EADDRINUSE.
+      for (let i = 0; i < 40 && await probe(`http://localhost:${port}/api/health`); i++) {
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      // If it outlived the kill, leave it be and open it rather than failing on
+      // a port that never came free.
+      running = await ready();
+    } catch {
+      console.error('[paperr] Couldn\'t stop the running copy — close paperr and run this again');
+      console.error('         to finish updating. Opening the version that\'s running.');
+    }
+  }
+
+  if (running) {
     console.log('[paperr] Already running.');
   } else if (!dev && await probe(`http://localhost:${port}/api/health`)) {
     console.error(`[paperr] Port ${port} is taken by a server that isn't serving the built client`);
@@ -438,4 +502,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { readPort, icoFrom, winShortcutScript, winUninstallScript, UNINSTALL_KEY, SHORTCUTS, slug };
+module.exports = { readPort, icoFrom, winShortcutScript, winUninstallScript, UNINSTALL_KEY, SHORTCUTS, slug, movedSinceBuild };
