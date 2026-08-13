@@ -76,6 +76,12 @@ function winShortcutScript(icon, folders = SHORTCUT_FOLDERS) {
     '$w = New-Object -ComObject WScript.Shell',
     `foreach ($d in ${folders}) {`,
     `  $s = $w.CreateShortcut((Join-Path $d '${name}.lnk'))`,
+    // A dev checkout and a one-click install share these two names, and whoever
+    // launched last used to win — silently repointing the install's shortcuts at
+    // an unrelated folder. Leave an entry alone while it still points at a
+    // working launch.js somewhere else; only take it over once that path is gone.
+    '  $o = $s.WorkingDirectory',
+    `  if ($o -and $o -ne '${root}' -and (Test-Path (Join-Path $o 'scripts\\launch.js'))) { continue }`,
     `  $s.TargetPath = '${process.execPath}'`,
     `  $s.Arguments = '"${__filename}"${dev ? ' --dev' : ''}'`,
     `  $s.WorkingDirectory = '${root}'`,
@@ -96,16 +102,22 @@ function winUninstallScript(icon, key = UNINSTALL_KEY) {
   const uninstaller = `"${process.execPath}" "${path.join(root, 'scripts', 'uninstall.js')}"`;
   return [
     `$k = '${key}'`,
-    'New-Item -Path $k -Force | Out-Null',
-    "Set-ItemProperty $k DisplayName 'paperr'",
-    `Set-ItemProperty $k DisplayVersion '${version}'`,
-    "Set-ItemProperty $k Publisher 'biswasprateek'",
-    `Set-ItemProperty $k InstallLocation '${root}'`,
-    `Set-ItemProperty $k UninstallString '${uninstaller}'`,
-    "Set-ItemProperty $k URLInfoAbout 'https://paperr.ai/'",
-    'Set-ItemProperty $k NoModify 1 -Type DWord',
-    'Set-ItemProperty $k NoRepair 1 -Type DWord',
-    icon ? `Set-ItemProperty $k DisplayIcon '${icon}'` : '',
+    // Same ownership rule as the shortcuts: one Installed apps entry, so don't
+    // hijack it from another copy that is still on disk — its Uninstall button
+    // would then point at the wrong folder.
+    '$o = (Get-ItemProperty $k -ErrorAction SilentlyContinue).InstallLocation',
+    `if (-not ($o -and $o -ne '${root}' -and (Test-Path (Join-Path $o 'scripts\\launch.js')))) {`,
+    '  New-Item -Path $k -Force | Out-Null',
+    "  Set-ItemProperty $k DisplayName 'paperr'",
+    `  Set-ItemProperty $k DisplayVersion '${version}'`,
+    "  Set-ItemProperty $k Publisher 'biswasprateek'",
+    `  Set-ItemProperty $k InstallLocation '${root}'`,
+    `  Set-ItemProperty $k UninstallString '${uninstaller}'`,
+    "  Set-ItemProperty $k URLInfoAbout 'https://paperr.ai/'",
+    '  Set-ItemProperty $k NoModify 1 -Type DWord',
+    '  Set-ItemProperty $k NoRepair 1 -Type DWord',
+    icon ? `  Set-ItemProperty $k DisplayIcon '${icon}'` : '',
+    '}',
   ].filter(Boolean).join('\n');
 }
 

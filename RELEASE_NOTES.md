@@ -1,14 +1,20 @@
 # Release 1.0.1 — "Begonia"
 
-_2026-08-11_
+_2026-08-12_
 
-An install-and-update release. paperr can now be installed by double-clicking one file on Windows, macOS, or Linux, launches from real desktop/Start-Menu entries into its own app window, installs as a proper web app, updates itself from Settings, and uninstalls by double-clicking one file too. Plus archivable habits, and a typography pass across the app.
+An install-and-update release. paperr can now be installed by double-clicking one file on Windows, macOS, or Linux — installing Node, git, and Python for you if they're missing — then launches from real desktop/Start-Menu entries into its own app window, installs as a proper web app, updates itself from Settings, and uninstalls by double-clicking one file too. Plus archivable habits, and a typography pass across the app.
 
 ## Highlights
 
 ### 🧪 One-click installers (experimental)
 
-Three downloadable files — [`install/paperr-windows.cmd`](install/paperr-windows.cmd), [`install/paperr-macos.command`](install/paperr-macos.command), [`install/paperr-linux.sh`](install/paperr-linux.sh) — take a non-technical user from nothing to a running paperr in one double-click. Each opens with an ASCII paperr banner, checks for Node 22.5+ and git (linking to the download page if either is missing), then runs `npx -y paperr@latest`.
+Three downloadable files — [`install/paperr-windows.cmd`](install/paperr-windows.cmd), [`install/paperr-macos.command`](install/paperr-macos.command), [`install/paperr-linux.sh`](install/paperr-linux.sh) — take a non-technical user from nothing to a running paperr in one double-click. Each opens with an ASCII paperr banner, settles the prerequisites, then runs `npx -y paperr@latest`.
+
+**Missing prerequisites are installed, not just linked.** The scripts check for Node, git, and Python up front, list only what's actually missing alongside what each one is for, wait for a keypress, and install them — winget on Windows, Homebrew on macOS, apt/dnf/zypper/pacman (via `sudo`, so it prompts) on Linux. Where none of those exist — no winget, no Homebrew, an unrecognised distro — they fall back to naming the three downloads and opening the pages. Python is on the list because the bundled AI server needs it, but it never blocks the install: `npm install`'s postinstall already skips the venv when there's no interpreter.
+
+Two platform quirks are handled rather than left to the user. Distro Node is often years behind and paperr needs `node:sqlite`, so Linux re-checks the major version after installing and stops with a link to nodejs.org if it's still below 22. On Windows, winget updates the machine PATH but not the already-running window's copy, so the script appends the default install folders itself and only asks for a re-run when `node`/`git` still don't resolve.
+
+A genuine first install now also confirms before it starts — it writes to `~/paperr` and takes a few minutes. Only the first: these files double as the launcher, and a keypress before every start would be tiresome.
 
 First run clones paperr to `~/paperr` (`%USERPROFILE%\paperr` on Windows), installs dependencies, generates `server/.env` with real JWT secrets, builds the client, starts the server on `:3000`, and opens the app. Every run after that just starts it. Each step now says where it's putting things — the checkout, `server/node_modules`, `client/node_modules`, `server/.env`, `client/dist` — instead of going quiet for several minutes.
 
@@ -27,6 +33,8 @@ Installing creates **two** entries, not one, on every platform (Desktop + Start 
 
 Both point at the same install and differ only in how they start the server, and whichever one you run creates both — so the one you've never clicked still shows up. Only `paperr LAN Server` prints a network address; the dev shortcut is localhost-only. The list lives in one place in [`scripts/launch.js`](scripts/launch.js) and is shared by all three platform builders and the uninstaller, so the two can't drift apart.
 
+A dev checkout and a one-click install create shortcuts under these same two names, and whoever launched last used to win — silently repointing the install's shortcuts at an unrelated folder. An existing entry is now left alone while it still points at a working `scripts/launch.js` somewhere else, and taken over only once that path is gone. The Windows **Installed apps** entry follows the same rule: there's only one of it, and hijacking it would leave its Uninstall button running the wrong folder's uninstaller.
+
 ### Desktop app entry, without Electron
 
 [`scripts/launch.js`](scripts/launch.js) is a single idempotent launcher: it starts the server only if it isn't already answering, creates the desktop entries, then opens paperr in a chromeless Chrome/Edge/Brave window via `--app=` — an app window with its own icon, with no bundled browser and nothing installed system-wide. Falls back to a normal tab when no Chromium-family browser is present, and prints the URL when there's no opener at all (headless boxes, WSL). Entries are rewritten on every launch, so one pointing at a moved or deleted checkout repairs itself. Also reachable from an existing checkout as `npm run app` (`npm run app -- --dev` for the dev servers).
@@ -41,7 +49,11 @@ A web app manifest ([`client/public/manifest.webmanifest`](client/public/manifes
 
 ### Uninstall
 
-Three more double-clickable files — [`install/uninstall-windows.cmd`](install/uninstall-windows.cmd), [`install/uninstall-macos.command`](install/uninstall-macos.command), [`install/uninstall-linux.sh`](install/uninstall-linux.sh) — stop the server and remove every shortcut. Each asks whether to delete your data as well and **defaults to no**: it's a household's notes and uploads, and none of it is recoverable. Windows additionally registers paperr under **Settings → Installed apps** (HKCU, so no admin rights), whose Uninstall button runs the same script. From a terminal it's still `npm run uninstall` in the install folder, plus `-- --purge` to delete the database, uploads and backups too.
+Three more double-clickable files — [`install/uninstall-windows.cmd`](install/uninstall-windows.cmd), [`install/uninstall-macos.command`](install/uninstall-macos.command), [`install/uninstall-linux.sh`](install/uninstall-linux.sh) — print the same banner, name the folder they're about to uninstall, wait for a keypress, then stop the server and remove the shortcuts. Each asks whether to delete your data as well and **defaults to no**: it's a household's notes and uploads, and none of it is recoverable. Windows additionally registers paperr under **Settings → Installed apps** (HKCU, so no admin rights), whose Uninstall button runs the same script. From a terminal it's still `npm run uninstall` in the install folder, plus `-- --purge` to delete the database, uploads and backups too.
+
+[`scripts/uninstall.js`](scripts/uninstall.js) applies the ownership rule in reverse — it removes only the entries this copy created, reading the checkout path back out of the `.lnk`'s working directory, the macOS bundle's exec stub, or the `.desktop` `Exec` line — so uninstalling a dev checkout no longer strips the real install's shortcuts. Run from a copy that owns none of them, it says so and prints the command for the copy that does, rather than reporting success and offering to delete the wrong folder.
+
+It now also asks about your data whenever there's a terminal to answer in, not only when `--purge` was passed. Someone clicking Uninstall in Settings reasonably expects the app gone, but that folder holds the only copy of their notes — so the question gets asked when a person is there, and the data is kept when nobody is (Settings runs the script with no console attached).
 
 ### In-app updates
 
@@ -53,7 +65,7 @@ The pulled server code takes effect on the next launch — the panel says so rat
 
 ### `npx paperr` now installs *and* starts
 
-The npm bootstrap was a clone-and-print-instructions script; it now hands off to the launcher, so `npx paperr` clones, installs, builds, starts, and opens the app in one go. Re-running it against an existing checkout skips the clone and just starts paperr, which makes it double as a start command. Node version is checked up front (the server needs `node:sqlite`, so 22.5+), an existing checkout from before the launcher existed is brought up to date with `git pull --ff-only` instead of forcing a delete-and-re-clone, and an interrupted clone gets a clear message rather than a git failure.
+The npm bootstrap was a clone-and-print-instructions script; it now hands off to the launcher, so `npx paperr` clones, installs, builds, starts, and opens the app in one go. Re-running it against an existing checkout skips the clone and just starts paperr, which makes it double as a start command. Node version is checked up front (the server needs `node:sqlite`, so 22.5+), an existing checkout from before the launcher existed is brought up to date with `git pull --ff-only` instead of forcing a delete-and-re-clone, and an interrupted clone gets a clear message rather than a git failure. Published as `paperr@1.0.1-beta`.
 
 ### Archive habits
 
@@ -75,6 +87,12 @@ README trimmed: the long per-feature screenshot gallery collapsed into a single 
 
 ## Fixes
 
+- Shortcut creation could fail without saying anything. `spawnSync` reports a missing `powershell` on `.error` and a failed script on a non-zero `.status` rather than throwing, and both were being swallowed — so the entries simply never appeared, with a successful-looking install around them. Both now raise.
+- Shortcuts are created before the server work, not after. A first run that died in `npm install` or found the port busy returned early and left a fresh clone with no shortcuts at all — the one thing a one-click install owes.
+- The Windows banner rendered as mojibake and ran a stray command. `cmd` reads the file in the OEM code page, so the em dash arrived as garbage, and a bare `&` inside `echo` ends the echo and executes the rest of the line as a command. It's plain ASCII with an escaped `^&` now — and the wordmark reads `paperr` on all three platforms, with the same banner added to the uninstallers.
+- macOS installs made before the first `npm install` kept a blurry Launchpad icon forever. `sharp` lives in `server/node_modules`, so the launcher fell back to the `sips` conversion and still stamped it as final. The version stamp is now written only for the sharp-rendered icon, so the next launch regenerates the good one.
+- `--purge` on Windows could fail with `EPERM`: git marks objects under `.git` read-only. `fs.rmSync` retries instead of giving up.
+- The installer banner's blurb read `routines,focus tools`.
 - Windows stopped popping console windows. The server is started detached and so has no console of its own; every `execFile`/`spawn` under it inherited Node's `windowsHide: false` default, which handed each child a brand-new console — visibly, once every few seconds for the bundled AI server's memory poll, and again on every git/npm call during a self-update. Fixed at the source in [`server/ai/litertSupervisor.js`](server/ai/litertSupervisor.js) and [`server/services/updateService.js`](server/services/updateService.js), so it covers the model import and every update step, not just the poll.
 - Uninstalling on macOS left a ghost icon in Launchpad. Deleting the `.app` doesn't update the LaunchServices database that Launchpad indexes from, so the uninstaller now also unregisters the path with `lsregister -u` — after the delete, never before: it hands the unregister to a daemon rather than committing inline, and running it first can re-register the bundle instead of dropping it.
 - `.gitattributes` now pins line endings per launcher type (`*.cmd`/`*.ps1` CRLF, `*.sh`/`*.command` LF) — a shell script checked out with CRLF fails to run at all.
@@ -83,7 +101,7 @@ README trimmed: the long per-feature screenshot gallery collapsed into a single 
 
 ## Tests
 
-`scripts/launch.test.js` now builds both real `.lnk` files in a temp folder and reads them back, asserting each lands in both shortcut folders with the right `--dev` argument and repairs itself when left pointing somewhere stale. Windows-only; skipped elsewhere.
+`scripts/launch.test.js` now builds both real `.lnk` files in a temp folder and reads them back, asserting each lands in both shortcut folders with the right `--dev` argument and repairs itself when left pointing somewhere stale. A second case covers the ownership rule from both sides: a shortcut pointing at another checkout that still exists survives a launch untouched, and the same entry is taken over once that checkout is deleted. Windows-only; skipped elsewhere.
 
 ## Dependencies
 

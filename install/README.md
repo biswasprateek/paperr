@@ -9,7 +9,10 @@ Download the file for your OS and double-click it. First run installs paperr to
 | macOS   | `paperr-macos.command` | `chmod +x` it, then right-click → Open       |
 | Linux   | `paperr-linux.sh`      | `chmod +x` it                                 |
 
-Needs **Node 22.5+** and **git** — the script links you to them if they're missing.
+Needs **Node 22.5+** and **git**, plus **Python 3** for the built-in AI server.
+Anything missing, the script lists it, waits for a keypress, and installs it with
+winget (Windows), Homebrew (macOS) or apt/dnf/zypper/pacman (Linux) — falling back
+to download links where none of those exist.
 
 What it does: runs `npx paperr@latest`, which clones the repo, installs deps,
 generates `server/.env` with real JWT secrets, builds the client, starts the

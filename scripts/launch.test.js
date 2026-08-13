@@ -67,6 +67,31 @@ test('winShortcutScript: writes both shortcuts to every folder', { skip: process
   assert.equal(after.stdout.trim(), `"${path.join(__dirname, 'launch.js')}" --dev`, 'stale shortcut repaired');
 });
 
+// A dev checkout and a one-click install share these two names. Whoever ran last
+// used to win, silently repointing the install's shortcuts at the repo.
+test('winShortcutScript: keeps another live install\'s shortcut', { skip: process.platform !== 'win32' }, () => {
+  const base = fs.mkdtempSync(path.join(os.tmpdir(), 'paperr-own-'));
+  const desktop = path.join(base, 'Desktop');
+  fs.mkdirSync(desktop);
+
+  const other = path.join(base, 'other');
+  fs.mkdirSync(path.join(other, 'scripts'), { recursive: true });
+  fs.writeFileSync(path.join(other, 'scripts', 'launch.js'), '');
+
+  const ps = (cmd) => spawnSync('powershell', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', cmd], { encoding: 'utf8' });
+  const lnk = path.join(desktop, 'paperr.lnk');
+  const workdir = () => ps(`(New-Object -ComObject WScript.Shell).CreateShortcut('${lnk}').WorkingDirectory`).stdout.trim();
+
+  ps(`$s = (New-Object -ComObject WScript.Shell).CreateShortcut('${lnk}'); $s.TargetPath = '${process.execPath}'; $s.WorkingDirectory = '${other}'; $s.Save()`);
+  ps(winShortcutScript(null, `@('${desktop}')`));
+  assert.equal(workdir(), other, 'the other install keeps its shortcut');
+
+  // Once that install is gone the entry is dead, so this copy takes it over.
+  fs.rmSync(other, { recursive: true, force: true });
+  ps(winShortcutScript(null, `@('${desktop}')`));
+  assert.equal(workdir(), path.join(__dirname, '..'), 'dead entry taken over');
+});
+
 // Written into a scratch HKCU key, never the real one — the values are
 // hand-built strings and UninstallString embeds quotes, which is the risk.
 test('winUninstallScript: registers a readable uninstall entry', { skip: process.platform !== 'win32' }, () => {

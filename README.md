@@ -283,7 +283,7 @@ For non-technical users, one downloadable file does the whole thing:
 | macOS   | [`install/paperr-macos.command`](install/paperr-macos.command) | `chmod +x` it, then right-click → **Open**        |
 | Linux   | [`install/paperr-linux.sh`](install/paperr-linux.sh)         | `chmod +x` it                                        |
 
-Still needs **Node 22.5+** and **git** — the file links you to them if either is missing. On first run it clones paperr to `~/paperr` (`%USERPROFILE%\paperr` on Windows), installs dependencies, generates `server/.env`, builds the client, starts the server on `:3000`, and opens the app. Every run after that just starts it.
+**Nothing to install first.** The file checks for **Node 22.5+**, **git**, and **Python 3** (for the bundled AI server, which never blocks the install), lists whatever's missing, and installs it for you after a keypress — winget on Windows, Homebrew on macOS, apt/dnf/zypper/pacman on Linux — falling back to download links where none of those exist. It then confirms once before a first install, clones paperr to `~/paperr` (`%USERPROFILE%\paperr` on Windows), installs dependencies, generates `server/.env`, builds the client, starts the server on `:3000`, and opens the app. Every run after that just starts it.
 
 **Everyday use:** the installer adds a desktop shortcut plus an app-menu entry (Start Menu / `~/Applications/paperr.app` / `.desktop`). Clicking it starts the server if it isn't already running, then opens paperr in a chromeless Chrome/Edge window — an app window with its own icon and taskbar entry. No Electron, no bundled browser, nothing installed system-wide, and **no code signing on any platform** — which is exactly why Windows shows the SmartScreen prompt the first time. Without a Chromium-family browser it falls back to a normal tab in your default one.
 
@@ -291,7 +291,9 @@ From an existing checkout, `npm run app` does the same thing (`npm run app -- --
 
 On macOS without Chrome/Edge/Brave installed, Safari has no `--app` equivalent, so paperr opens as a normal tab — use Safari's **File → Add to Dock** (macOS 14+) for a real app window, or install a Chromium-based browser.
 
-**Uninstalling:** double-click `install/uninstall-windows.cmd` / `uninstall-macos.command` / `uninstall-linux.sh`, which asks whether to remove your data and defaults to keeping it. Windows also lists paperr in **Settings → Installed apps**. From a terminal it's `npm run uninstall` in the install folder, plus `-- --purge` to delete the database, uploads and backups as well.
+**Uninstalling:** double-click `install/uninstall-windows.cmd` / `uninstall-macos.command` / `uninstall-linux.sh`, which names the folder it's about to remove, then asks whether to delete your data and defaults to keeping it. Windows also lists paperr in **Settings → Installed apps**. From a terminal it's `npm run uninstall` in the install folder, plus `-- --purge` to delete the database, uploads and backups as well.
+
+A dev checkout and a one-click install use the same shortcut names, so each only ever touches the entries it created — launching one won't repoint the other's shortcuts, and uninstalling one won't strip them.
 
 Full detail, including the failure modes: [`install/README.md`](install/README.md).
 

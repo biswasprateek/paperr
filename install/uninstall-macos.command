@@ -4,6 +4,23 @@
 # Downloading strips the execute bit, so the first time:
 #   chmod +x uninstall-macos.command
 
+cat <<'BANNER'
+
+                             .+:
+                        .+####+
+                  ..+########+.     ####    ####  ####    ###   # ##  # ##
+             .:+###########++:      #   #      #  #   #  #   #  ##    ##
+        .:+###############+++       #   #   ####  #   #  #####  #     #
+   .:+##################++++.       #   #  #   #  #   #  #      #     #
+.:+++##################++++.        ####    ####  ####    ###   #     #
+               ....:+++++++         #             #
+                  ...:++++          #             #
+                    ..+++.
+                      .+:
+                       :
+
+BANNER
+
 PAPERR="$HOME/paperr"
 
 if [ ! -f "$PAPERR/scripts/uninstall.js" ]; then
@@ -13,7 +30,11 @@ if [ ! -f "$PAPERR/scripts/uninstall.js" ]; then
   exit 1
 fi
 
+echo "Uninstalling paperr from $PAPERR Location..."
 echo "This stops the paperr server and removes ~/Applications/paperr.app."
+echo
+printf 'Press Enter to continue, or Ctrl+C to cancel... '
+read -r _
 echo
 # Default is no: the data is a household's notes and uploads, none of it
 # recoverable once deleted.
