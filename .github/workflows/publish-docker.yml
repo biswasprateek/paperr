@@ -59,6 +59,8 @@ jobs:
           push: true
           platforms: ${{ matrix.platforms }}
           build-args: WITH_AI=${{ matrix.with_ai }}
+          provenance: false
+          sbom: false
           tags: |
             ghcr.io/${{ github.repository_owner }}/paperr:${{ matrix.tag }}
             ghcr.io/${{ github.repository_owner }}/paperr:${{ steps.version.outputs.value }}${{ matrix.suffix }}
