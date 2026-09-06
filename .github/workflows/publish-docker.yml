@@ -1,0 +1,66 @@
+name: Publish Docker images
+
+# Two variants, from the one Dockerfile via its WITH_AI build arg:
+#
+#   :latest / :<version>       includes paperrAi Server. amd64 only —
+#                              its native library has no arm64 build.
+#   :slim   / :<version>-slim  no paperrAi Server, half the size, amd64 +
+#                              arm64 (Raspberry Pi, Apple Silicon). dotAi then
+#                              needs an external LLM_BASE_URL.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - variant: ai
+            with_ai: 1
+            platforms: linux/amd64
+            tag: latest
+            suffix: ""
+          - variant: slim
+            with_ai: 0
+            platforms: linux/amd64,linux/arm64
+            tag: slim
+            suffix: "-slim"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: version
+        run: echo "value=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      # Only the slim variant is built for a foreign arch.
+      - uses: docker/setup-qemu-action@v3
+        if: matrix.variant == 'slim'
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: ${{ matrix.platforms }}
+          build-args: WITH_AI=${{ matrix.with_ai }}
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/paperr:${{ matrix.tag }}
+            ghcr.io/${{ github.repository_owner }}/paperr:${{ steps.version.outputs.value }}${{ matrix.suffix }}
+          cache-from: type=gha,scope=${{ matrix.variant }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.variant }}

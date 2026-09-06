@@ -17,9 +17,10 @@ const dev = args.includes("--dev");
 const dir = path.resolve(args.find((a) => !a.startsWith("-")) || "paperr");
 
 const [major, minor] = process.versions.node.split(".").map(Number);
-if (major < 22 || (major === 22 && minor < 5)) {
-  // The server uses node:sqlite, which landed in 22.5.
-  console.error(`paperr needs Node 22.5+ — you have ${process.versions.node}. https://nodejs.org/en/download`);
+if (major < 22 || (major === 22 && minor < 13)) {
+  // The server uses node:sqlite unflagged. It landed behind a flag in 22.5, but
+  // 22.x only stopped needing --experimental-sqlite in 22.13.
+  console.error(`paperr needs Node 22.13+ — you have ${process.versions.node}. https://nodejs.org/en/download`);
   process.exit(1);
 }
 

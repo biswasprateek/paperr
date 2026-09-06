@@ -86,6 +86,69 @@ function refreshMemoryIfStale() {
   }).catch(() => { lastMemMB = null; });
 }
 
+// KV cache size comes from the LLM configuration row pointing at this server —
+// Settings → AI → Context window — so the admin page stays the one place it is set.
+// Takes effect on the next AI server start, since the cache is allocated at load.
+const DEFAULT_KV_CACHE_TOKENS = 8192;
+
+function kvCacheTokens() {
+  try {
+    // Required lazily: setupLiteRT.js pulls this module in at postinstall, when
+    // there may be no database yet.
+    const { getDb } = require('../db/db');
+    const row = getDb().prepare(
+      'SELECT context_window FROM llm_configurations WHERE base_url LIKE ? ORDER BY is_active DESC, id LIMIT 1'
+    ).get(`%:${PORT}%`);
+    return row?.context_window || DEFAULT_KV_CACHE_TOKENS;
+  } catch {
+    return DEFAULT_KV_CACHE_TOKENS; // no DB yet — fall back to the bundled default
+  }
+}
+
+// `litert-lm serve` hardcodes the engine's KV cache to the model's own default
+// (4096 tokens for gemma4-e2b) and exposes no flag for it, even though `run` and
+// `benchmark` both take --max-num-tokens. 4096 is not enough for paperr's chat:
+// the tool schemas alone are ~2900 tokens, so a single tool result tips the
+// request over and the server answers 500 "Input token ids are too long".
+// This rewrites that one hardcoded line to read an env var, which launch() sets.
+//
+// ponytail: patching a vendored file, re-checked on every start and a no-op once
+// applied. If a future litert-lm reshapes serve_util.py the patch simply doesn't
+// apply and we fall back to the model default.
+const PRISTINE_KV_LINE = '\n  max_num_tokens = None\n';
+const PATCHED_KV_LINE =
+  '\n  max_num_tokens = int(__import__("os").environ.get("LITERT_LM_MAX_NUM_TOKENS") or 0) or None\n';
+
+// site-packages sits at Lib/site-packages on Windows, lib/python3.x/site-packages elsewhere.
+function serveUtilPath() {
+  const libDir = path.join(VENV_DIR, process.platform === 'win32' ? 'Lib' : 'lib');
+  const roots = process.platform === 'win32'
+    ? [path.join(libDir, 'site-packages')]
+    : (fs.existsSync(libDir) ? fs.readdirSync(libDir).map(d => path.join(libDir, d, 'site-packages')) : []);
+  for (const root of roots) {
+    const p = path.join(root, 'litert_lm_cli', 'commands', 'serve_util.py');
+    if (fs.existsSync(p)) return p;
+  }
+  return null;
+}
+
+function ensureKvCachePatch() {
+  const p = serveUtilPath();
+  if (!p) return;
+  try {
+    const src = fs.readFileSync(p, 'utf8');
+    if (src.includes('LITERT_LM_MAX_NUM_TOKENS')) return;   // already patched
+    if (!src.includes(PRISTINE_KV_LINE)) {
+      logger.info('[litert-lm] KV cache patch skipped — serve_util.py is not the expected shape');
+      return;
+    }
+    fs.writeFileSync(p, src.replace(PRISTINE_KV_LINE, PATCHED_KV_LINE));
+    logger.info('[litert-lm] patched serve_util.py — KV cache is now configurable');
+  } catch (err) {
+    logger.info(`[litert-lm] KV cache patch skipped: ${err.message}`);
+  }
+}
+
 function isInstalled() {
   return fs.existsSync(CLI_PATH);
 }
@@ -162,7 +225,11 @@ async function launch() {
   await cleanupStalePid();
   if (status !== 'starting') return; // stop() was called while we were cleaning up
 
-  const self = spawn(CLI_PATH, ['serve', '--host', HOST, '--port', String(PORT)], HIDDEN);
+  ensureKvCachePatch();
+  const self = spawn(CLI_PATH, ['serve', '--host', HOST, '--port', String(PORT)], {
+    ...HIDDEN,
+    env: { ...process.env, LITERT_LM_MAX_NUM_TOKENS: String(kvCacheTokens()) },
+  });
   child = self;
   fs.mkdirSync(path.dirname(PID_FILE), { recursive: true });
   fs.writeFileSync(PID_FILE, String(self.pid));

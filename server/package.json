@@ -1,6 +1,6 @@
 {
   "name": "paperr-server",
-  "version": "1.0.0-beta",
+  "version": "1.0.2-beta",
   "description": "paperr Express API",
   "main": "index.js",
   "scripts": {

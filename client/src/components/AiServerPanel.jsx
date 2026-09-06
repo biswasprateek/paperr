@@ -118,7 +118,7 @@ export default function AiServerPanel() {
 
         {status.status === 'not_installed' && (
           <p className="text-label-sm text-error bg-error-container px-4 py-2.5 rounded-xl">
-            litert-lm isn't installed yet. Install it into <span className="font-mono">server/ai/litert/venv</span> to enable this feature.
+            paperrAi Server isn't installed on this machine yet. Re-run <span className="font-mono">npm install</span> in <span className="font-mono">server/</span> with Python 3 available, or — on Docker — use the <span className="font-mono">:latest</span> image rather than <span className="font-mono">:slim</span>.
           </p>
         )}
         {status.status === 'error' && status.lastError && (

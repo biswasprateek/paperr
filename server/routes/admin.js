@@ -200,6 +200,11 @@ router.post('/export', requireAuth, requireAdmin, (req, res) => {
 // git errors carry the useful part on stderr.
 const updateError = (err) => (err.stderr || err.message || '').trim();
 
+// Read-only — the cached result of the boot-time check, for the startup
+// toast. No network call, but same admin-only gate as the routes below:
+// only admins can act on an update, so only admins are told about one.
+router.get('/update/cached', requireAuth, requireAdmin, (req, res) => res.json(updateService.getLastCheck()));
+
 router.get('/update', requireAuth, requireAdmin, async (req, res) => {
   try {
     return res.json(await updateService.check());

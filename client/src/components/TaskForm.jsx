@@ -1070,7 +1070,7 @@ export default function TaskForm({ open, onClose, task = null, defaultStatus = n
           {saveError && (
             <p className="text-label-sm text-error text-center">{saveError}</p>
           )}
-          {task && task.status !== 'done' && (
+          {task && task.status !== 'done' && !task.archived && (
             <button
               type="button"
               onClick={() => { openDeepWork(task.id); onClose(); }}
@@ -1078,6 +1078,22 @@ export default function TaskForm({ open, onClose, task = null, defaultStatus = n
             >
               <span className="material-symbols-outlined text-[18px]">center_focus_strong</span>
               Start Deep Work
+            </button>
+          )}
+          {/* Archiving hides the task from every list, board and calendar view
+              without deleting it — the Archived filter on the tasks page is
+              where it (and this same button, flipped) can be found again. */}
+          {task && (
+            <button
+              type="button"
+              onClick={() => updateTask.mutate({ archived: task.archived ? 0 : 1 })}
+              disabled={isPending}
+              className="w-full h-11 rounded-full border border-outline-variant/40 text-on-surface-variant text-label-md font-bold tracking-wide hover:bg-surface-container transition-[background-color,transform] duration-150 active:scale-[0.97] disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              <span className="material-symbols-outlined text-[18px]">
+                {task.archived ? 'unarchive' : 'archive'}
+              </span>
+              {task.archived ? 'Restore from Archive' : 'Archive Task'}
             </button>
           )}
           <div className="flex gap-3">

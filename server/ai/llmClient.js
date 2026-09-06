@@ -64,15 +64,69 @@ function isTransientConnectionError(err) {
   return err.code === 'ECONNRESET' || /^HPE_/.test(err.code) || /parse error/i.test(err.message || '');
 }
 
+// Small local models hard-fail (HTTP 500 "Input token ids are too long") when the
+// rendered prompt exceeds their KV cache — gemma4-e2b defaults to 4096, and the
+// tool schemas alone are ~2900 of that. So every request gets budgeted here, the one
+// place all callers route through, instead of each caller guessing.
+//
+// ponytail: chars/4 estimate rather than a real tokenizer. CHARS_PER_TOKEN is the
+// calibration knob — lower it if a model's tokenizer runs denser than English prose.
+const CHARS_PER_TOKEN = 4;
+const MIN_OUTPUT_TOKENS = 256;
+
+const estimate = (v) =>
+  Math.ceil((typeof v === 'string' ? v : JSON.stringify(v ?? '')).length / CHARS_PER_TOKEN);
+
+// content + any tool_calls payload + role/delimiter framing
+const messageTokens = (m) => estimate(m.content) + (m.tool_calls ? estimate(m.tool_calls) : 0) + 4;
+
+// Trims history to fit the model's context window and returns the output allowance
+// left over. The system message always survives. Any single oversized message (a
+// big tool result) is capped to half the budget first, so it cannot squeeze out the
+// assistant turn that explains it, and only then are the oldest turns dropped.
+function fitContext(messages, tools, { contextWindow, maxTokens }) {
+  const system = messages[0]?.role === 'system' ? messages.slice(0, 1) : [];
+  const fixed = (tools?.length ? estimate(tools) : 0)
+              + (system.length ? messageTokens(system[0]) : 0);
+  const room = contextWindow - fixed - MIN_OUTPUT_TOKENS;
+  const perMessageCap = Math.floor(room / 2);
+
+  const capped = messages.slice(system.length).map((m) => {
+    if (typeof m.content !== 'string' || perMessageCap <= 0) return m;
+    if (estimate(m.content) <= perMessageCap) return m;
+    return { ...m, content: m.content.slice(0, perMessageCap * CHARS_PER_TOKEN) + '\n…[truncated]' };
+  });
+
+  let left = room;
+  const kept = [];
+  for (let i = capped.length - 1; i >= 0; i--) {
+    const cost = messageTokens(capped[i]);
+    if (cost > left) break; // everything older than this is dropped too
+    kept.unshift(capped[i]);
+    left -= cost;
+  }
+
+  // A tool result whose assistant tool_calls message got dropped is an orphan, and
+  // OpenAI-compatible servers reject it outright.
+  while (kept.length && kept[0].role === 'tool') kept.shift();
+
+  const used = kept.reduce((n, m) => n + messageTokens(m), 0);
+  return {
+    messages: [...system, ...kept],
+    maxTokens: Math.max(MIN_OUTPUT_TOKENS, Math.min(maxTokens, contextWindow - fixed - used)),
+  };
+}
+
 async function callLLM({ messages, tools }) {
   const cfg = getLLMConfig();
   const headers = buildHeaders(cfg.baseUrl, cfg.apiKey);
+  const fitted = fitContext(messages, tools, cfg);
 
   const body = {
     model:             cfg.model,
-    messages,
+    messages:          fitted.messages,
     temperature:       cfg.temperature,
-    max_tokens:        cfg.maxTokens,
+    max_tokens:        fitted.maxTokens,
     top_p:             cfg.topP,
     frequency_penalty: cfg.frequencyPenalty,
     presence_penalty:  cfg.presencePenalty,
@@ -144,4 +198,4 @@ async function fetchModels(baseUrl, apiKey) {
     .sort();
 }
 
-module.exports = { callLLM, pingLLM, fetchModels, getLLMConfig, LLMUnavailableError };
+module.exports = { callLLM, pingLLM, fetchModels, getLLMConfig, fitContext, LLMUnavailableError };

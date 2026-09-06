@@ -1,5 +1,6 @@
 require('dotenv').config();
 const logger = require('./utils/logger');
+const redact = require('./utils/redact');
 console.log(`[paperr] Log file: ${logger.LOG_PATH}`);
 const express = require('express');
 const http = require('http');
@@ -52,7 +53,7 @@ app.use(cookieParser());
 // ─── Request logger ───────────────────────────────────────────────────────────
 app.use((req, _res, next) => {
   if (req.path.startsWith('/api/')) {
-    logger.info(`${req.method} ${req.path}`, { body: req.body, query: req.query });
+    logger.info(`${req.method} ${req.path}`, { body: redact(req.body), query: redact(req.query) });
   }
   next();
 });
@@ -115,6 +116,7 @@ server.listen(PORT, '0.0.0.0', () => {
   scheduler.startScheduler(io);
   require('./services/backupService').startAutoBackupScheduler();
   require('./ai/litertSupervisor').start(); // no-ops if litert-lm isn't installed
+  require('./services/updateService').checkOnBoot(); // fire-and-forget; powers the startup update toast
 });
 
 // Make sure the litert-lm child process (and its own python.exe worker) never

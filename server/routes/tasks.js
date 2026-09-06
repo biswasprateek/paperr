@@ -13,12 +13,16 @@ router.get('/', requireAuth, requireSpace, (req, res) => {
     projectId, assignedTo, status, tag, areaId,
     dueFrom, dueTo, search, parentTaskId,
     isCompleted, includeUnassigned, excludeSubTasks,
-    completedAtFrom, completedAtTo,
+    completedAtFrom, completedAtTo, archived,
   } = req.query;
+  // ?archived=1 lists the archived tasks instead of the active ones — same
+  // convention as GET /routines/progress. Archiving only flips tasks.archived,
+  // so nothing is deleted and restoring is the same PUT with archived = 0.
   const tasks = taskService.getTasks({
     spaceId: req.spaceId,
     projectId, assignedTo, status, tag, areaId, dueFrom, dueTo, search, parentTaskId,
     completedAtFrom, completedAtTo,
+    archived: archived === '1',
     ...(isCompleted       !== undefined ? { isCompleted:       isCompleted       === 'true' } : {}),
     ...(includeUnassigned !== undefined ? { includeUnassigned: includeUnassigned === 'true' } : {}),
     ...(excludeSubTasks   !== undefined ? { excludeSubTasks:   excludeSubTasks   === 'true' } : {}),
@@ -240,6 +244,9 @@ router.post('/bulk', requireAuth, requireSpace, (req, res) => {
     const existing = taskService.getTaskWithTags(id);
     if (!existing || existing.space_id !== req.spaceId) continue;
     if (action === 'complete') results.push(taskService.completeTask(id, req.user.id));
+    else if (action === 'archive' || action === 'unarchive') {
+      results.push(taskService.updateTask(id, { archived: action === 'archive' ? 1 : 0 }, req.user.id));
+    }
     else if (action === 'delete') { taskService.deleteTask(id, req.user.id); results.push(id); }
     else if (action === 'reassign' && payload?.userId) {
       results.push(taskService.updateTask(id, { assigned_to: payload.userId }, req.user.id));

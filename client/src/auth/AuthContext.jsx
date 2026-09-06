@@ -29,6 +29,12 @@ api.interceptors.response.use(
         // or a missing session on mount will clear the user.
       }
     }
+    // No response at all = server unreachable, not a credentials problem. Every
+    // caller reads err.response.data.error, so fill it in once here rather than
+    // teaching each page to tell "server down" apart from "wrong password".
+    if (!err.response) {
+      err.response = { data: { error: 'Cannot reach the paperr server — check that it is running.' } };
+    }
     return Promise.reject(err);
   }
 );

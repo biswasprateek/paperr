@@ -73,6 +73,7 @@ const FILTER_OPTIONS = [
   { value: 'overdue',   label: 'Overdue' },
   { value: 'all',       label: 'All' },
   { value: 'completed', label: 'Done' },
+  { value: 'archived',  label: 'Archived' },
 ];
 
 const GROUP_BY_OPTIONS = [
@@ -1724,6 +1725,9 @@ export default function Tasks() {
     if (filter === 'active')    return { ...base, isCompleted: false };
     if (filter === 'completed') return { ...base, isCompleted: true };
     if (filter === 'overdue')   return { ...base, isCompleted: false, dueTo: yesterdayStr };
+    // Archived tasks are hidden from every other filter (the server defaults to
+    // archived = 0), so this is the only view that lists them — done or not.
+    if (filter === 'archived')  return { ...base, archived: 1 };
     return base;
   }, [filter, user?.id, assigneeFilter, yesterdayStr]);
 
@@ -1824,6 +1828,8 @@ export default function Tasks() {
 
   const handleBulkComplete = () =>
     bulkAction.mutate({ ids: [...selectedIds], action: 'complete' });
+  const handleBulkArchive = () =>
+    bulkAction.mutate({ ids: [...selectedIds], action: filter === 'archived' ? 'unarchive' : 'archive' });
   const handleBulkDelete = () => {
     if (!window.confirm(`Delete ${selectedIds.size} task${selectedIds.size === 1 ? '' : 's'}? This cannot be undone.`)) return;
     bulkAction.mutate({ ids: [...selectedIds], action: 'delete' });
@@ -2074,6 +2080,16 @@ export default function Tasks() {
                   Complete
                 </button>
                 <button
+                  onClick={handleBulkArchive}
+                  disabled={bulkAction.isPending}
+                  className="h-8 px-4 rounded-full bg-surface-container-high text-on-surface-variant text-label-md font-bold hover:bg-surface-container-highest transition disabled:opacity-50 flex items-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-[16px]">
+                    {filter === 'archived' ? 'unarchive' : 'archive'}
+                  </span>
+                  {filter === 'archived' ? 'Restore' : 'Archive'}
+                </button>
+                <button
                   onClick={handleBulkDelete}
                   disabled={bulkAction.isPending}
                   className="h-8 px-4 rounded-full bg-error-container text-error text-label-md font-bold hover:bg-error hover:text-on-error transition disabled:opacity-50 flex items-center gap-2"
@@ -2102,10 +2118,10 @@ export default function Tasks() {
       {!isLoading && processed.length === 0 && (
         <div className="text-center py-16 text-on-surface-variant">
           <span className="material-symbols-outlined text-5xl block mb-3">
-            {filter === 'overdue' ? 'check_circle' : search ? 'search_off' : 'assignment'}
+            {filter === 'overdue' ? 'check_circle' : filter === 'archived' ? 'inventory_2' : search ? 'search_off' : 'assignment'}
           </span>
           <p className="text-body-lg">
-            {filter === 'overdue' ? 'No overdue tasks — great work!' : search ? 'No tasks match your search' : 'No tasks found'}
+            {filter === 'overdue' ? 'No overdue tasks — great work!' : filter === 'archived' ? 'Nothing archived yet' : search ? 'No tasks match your search' : 'No tasks found'}
           </p>
           {search && (
             <button onClick={() => setSearch('')} className="mt-2 text-primary text-body-md hover:underline">

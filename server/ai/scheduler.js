@@ -63,6 +63,25 @@ function unregisterCustomAgent(id) {
   }
 }
 
+// Custom agents have no fixed daily slot to compare against (arbitrary cron),
+// so "hasn't run today" is the catch-up bar: last_run_at is stamped on every
+// attempt (success or fail) by customAgent() itself, and its own dedup guard
+// (skip while a report is still awaiting the user) makes re-running it safe.
+async function catchUpCustomAgents() {
+  const db = getDb();
+  const rows = db.prepare(`
+    SELECT id FROM custom_agents
+    WHERE enabled = 1 AND (last_run_at IS NULL OR date(last_run_at, 'localtime') != date('now', 'localtime'))
+  `).all();
+  for (const row of rows) {
+    try {
+      await customAgent(db, ioRef, row.id);
+    } catch (err) {
+      logger.info('agent customAgent catch-up failed', { customAgentId: row.id, error: err.message });
+    }
+  }
+}
+
 // Self-hosted servers are often asleep at fire time — after boot, run any
 // daily agent whose slot has already passed today. alreadyFiredToday makes
 // this idempotent.
@@ -75,6 +94,7 @@ async function catchUp() {
   await runForAllUsers(morningBrief, 'morningBrief');
   if (mins >= 9 * 60) await runForAllUsers(rescheduleAdvisor, 'rescheduleAdvisor');
   if (now.getDay() === 0 && mins >= 18 * 60) await runForAllUsers(workloadSpread, 'workloadSpread');
+  await catchUpCustomAgents();
 }
 
 function startScheduler(io) {

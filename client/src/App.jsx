@@ -37,6 +37,7 @@ import DeepWorkOverlay from './components/DeepWorkOverlay';
 import ClockEngine from './components/ClockEngine';
 import FrameEngine from './components/frame/FrameEngine';
 import CelebrationEngine from './components/CelebrationEngine';
+import UpdateToast from './components/UpdateToast';
 
 function SpaceGuard({ children }) {
   const { currentSpaceId, spaces } = useSpaceStore();
@@ -65,6 +66,7 @@ function AppRoutes() {
         <ClockEngine />
         <FrameEngine />
         <CelebrationEngine />
+        <UpdateToast />
         <Layout>
           <ErrorBoundary>
             <Routes>

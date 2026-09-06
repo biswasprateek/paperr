@@ -23,3 +23,4 @@ server/data/backups/*
 !server/data/logs/.gitkeep
 !server/data/databases/.gitkeep
 !server/data/backups/.gitkeep
+.github/workflows/publish-npm.yml

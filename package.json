@@ -1,6 +1,6 @@
 {
   "name": "paperr",
-  "version": "1.0.0-beta",
+  "version": "1.0.2-beta",
   "description": "Self-hosted household OS — tasks, calendar, notes, and a local AI assistant, all LAN-only",
   "scripts": {
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",

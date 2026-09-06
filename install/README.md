@@ -4,13 +4,24 @@ Download the file for your OS and double-click it. First run installs paperr to
 `~/paperr` (Windows: `%USERPROFILE%\paperr`); every run after that updates it to
 the latest release and starts it.
 
-| OS      | File                     | First-run note                                  |
-| ------- | ------------------------ | ----------------------------------------------- |
-| Windows | `paperr-windows.cmd`   | SmartScreen may warn — More info → Run anyway |
-| macOS   | `paperr-macos.command` | `chmod +x` it, then right-click → Open       |
-| Linux   | `paperr-linux.sh`      | `chmod +x` it                                 |
+| OS      | Download                                                                                      | First-run note                                              |
+| ------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Windows | [paperr-windows.zip](https://github.com/biswasprateek/paperr/releases/latest/download/paperr-windows.zip) | Unzip, run `paperr-windows.cmd` — SmartScreen may warn, More info → Run anyway |
+| macOS   | [paperr-macos.zip](https://github.com/biswasprateek/paperr/releases/latest/download/paperr-macos.zip)     | Unzip, right-click `paperr-macos.command` → Open (already executable) |
+| Linux   | [paperr-linux.zip](https://github.com/biswasprateek/paperr/releases/latest/download/paperr-linux.zip)     | Unzip, run `paperr-linux.sh` (already executable)             |
 
-Needs **Node 22.5+** and **git**, plus **Python 3** for the built-in AI server.
+Zipped rather than linked as raw files: Chrome and Edge treat bare `.cmd` /
+`.command` / `.sh` downloads as a dangerous file type and block them outright.
+Zips aren't on that list, so the download itself goes through. This does not
+remove the SmartScreen / Gatekeeper prompt on first run — that's the actual
+cost of shipping unsigned, not something zipping fixes — it only stops the
+*download* from being blocked.
+
+Those links 404 until the first GitHub Release carrying these assets is
+published — see [`.github/workflows/release-installers.yml`](../.github/workflows/release-installers.yml),
+which builds and attaches them automatically on every release.
+
+Needs **Node 22.13+** and **git**, plus **Python 3** for the built-in AI server.
 Anything missing, the script lists it, waits for a keypress, and installs it with
 winget (Windows), Homebrew (macOS) or apt/dnf/zypper/pacman (Linux) — falling back
 to download links where none of those exist.

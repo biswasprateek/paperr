@@ -44,8 +44,8 @@ function getTasks(filters = {}) {
   LEFT JOIN projects p ON t.project_id = p.id
   LEFT JOIN users u ON t.assigned_to = u.id
   LEFT JOIN areas a ON t.area_id = a.id
-  WHERE t.archived = 0`;
-  const params = [];
+  WHERE t.archived = ?`;
+  const params = [filters.archived ? 1 : 0];
 
   if (filters.spaceId)   { query += ' AND t.space_id = ?'; params.push(filters.spaceId); }
   if (filters.projectId) { query += ' AND t.project_id = ?'; params.push(filters.projectId); }

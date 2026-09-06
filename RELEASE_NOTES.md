@@ -1,3 +1,83 @@
+# Release 1.0.2 — "Carnation"
+
+_2026-08-13 (updated 2026-09-05)_
+
+A repair release for the one thing 1.0.1 got wrong: installing an update. Everything shipped since 1.0.1 was on npm and on git, and existing installs kept starting the version they were first cloned at — no error, no sign anything had happened. Re-running an installer now genuinely updates the copy it finds, and the launcher notices when the checkout has moved.
+
+## Highlights
+
+### Re-running an installer updates it
+
+The bootstrap only touched git when `scripts/launch.js` was missing. That check was written for checkouts predating the launcher, but every checkout has the file, so the entire clone-or-pull block was skipped on every run after the first: [`npm/bin/paperr.js`](npm/bin/paperr.js) launched whatever was on disk, however many releases behind it was. It now pulls on every run.
+
+A pull that can't fast-forward no longer stops the launch. Offline, or a checkout carrying local commits or edits to tracked files, prints one line — *"Couldn't update — starting the version you have"* — and hands off anyway; an install that works offline is worth more than a guarantee of freshness. A complete copy that isn't a clone at all (a downloaded zip) has nothing to pull and simply starts, while a half-finished directory still gets told to delete and re-run.
+
+Because `npm/bin/paperr.js` is the only file the npm package ships, this fix reaches existing installs only once it's published — the earlier bootstrap never pulls, so it never delivers the launcher fixes below either. Published as `paperr@1.0.2-beta`. Fresh installs were never affected; anyone already stuck can also unstick themselves from **Settings → Updates**, which pulls and rebuilds without touching npm.
+
+### The launcher notices a new version
+
+Pulling was necessary but not sufficient. `node_modules` and `client/dist` are both gitignored, and [`scripts/launch.js`](scripts/launch.js) rebuilt only when `client/dist/index.html` was missing and installed only when `node_modules` was — so a successful pull still ran on the previous release's dependencies and served the previously built bundle. Two of the three gates were invisible: the code was on disk, and nothing said it wasn't the code running.
+
+The launcher now writes the built commit to `.paperr-build` (gitignored) and compares it against `git rev-parse HEAD`. When they differ it refreshes dependencies via `install:all` — safe on every run, since `setup-env.js` leaves an existing `server/.env` and its secrets alone — and rebuilds the client. The stamp is written *after* the build, so a failed build retries on the next launch instead of being recorded as ready. An install with no stamp at all counts as moved, which is what unsticks the copies already sitting on old code. Not a clone, so no HEAD to compare? Then nothing changes: the old "is it there" checks decide on their own.
+
+### An update restarts the server
+
+The last gate. With paperr already answering, the launcher printed "Already running." and opened the browser — so the freshly pulled code sat on disk while the old process kept serving. A moved HEAD now stops the recorded PID, waits for the port to come free (starting into it hits `EADDRINUSE`), and starts the new build. If it outlives the kill, the launcher opens what's running rather than failing on a port that never freed.
+
+Production only: `paperr.pid` records the detached production server, while a dev run answers on `:5173` and writes no PID — killing what's in that file would be killing something else entirely. Vite serves from source anyway.
+
+### Docker
+
+paperr now publishes to GHCR as [`docker-compose.yml`](docker-compose.yml) + [`Dockerfile`](Dockerfile), via a new `publish-docker.yml` workflow. Two tags: `:latest` bundles paperrAi Server (`linux/amd64` only — its native library is x86_64-only); `:slim` drops it for `linux/amd64` + `linux/arm64`, pointing `LLM_BASE_URL` at an external Ollama/LM Studio instead. Everything that persists — databases, uploads, backups, logs, downloaded models, auto-generated JWT secrets — lives in one `paperr-data` volume. Details in [`.docs/Docker.md`](.docs/Docker.md).
+
+Node's minimum went from 22.5 to **22.13+** across the app, the one-click installers, and the npm wrapper, and the bundled AI backend is now named **paperrAi Server** everywhere user-facing (UI and docs) instead of `litert-lm`.
+
+### Task archiving
+
+Tasks can now be archived, not just deleted — the New/Edit Task modal grows an Archive/Restore button, `MyTasks` gets an **Archived** filter plus bulk archive/unarchive, and `GET /tasks` takes `?archived=1` the same way `GET /routines/progress` already does. `taskService.getTasks` filters on `t.archived` instead of hardcoding it to `0`, so an archived task is invisible to every other filter and nothing is ever deleted. Self-check at [`server/routes/tasks.archive.test.js`](server/routes/tasks.archive.test.js).
+
+### Chat no longer 500s on a long conversation
+
+Local models hard-fail ("Input token ids are too long") once a rendered prompt exceeds their KV cache — gemma4-e2b defaults to 4096 tokens, and paperr's tool schemas alone are ~2900 of that, so any real back-and-forth in the chat drawer tipped it over. [`llmClient.js`](server/ai/llmClient.js) now runs every request through a new `fitContext`: the system message always survives, an oversized single message (a big tool result) is truncated before anything else, then oldest turns are dropped until the rest fits, and the output token allowance is clamped to whatever room is left. Self-check at [`server/ai/llmClient.contextfit.test.js`](server/ai/llmClient.contextfit.test.js).
+
+That budget is only half the fix — the other half is `litert-lm serve` itself, which hardcodes its KV cache to the model's default and exposes no flag for it (`run` and `benchmark` do, `serve` doesn't). [`litertSupervisor.js`](server/ai/litertSupervisor.js) now patches the vendored `serve_util.py` on start to read `LITERT_LM_MAX_NUM_TOKENS` from the environment, set from the context window already configurable in **Settings → AI**, so the two numbers paperr reasons about and the one the model actually enforces finally agree.
+
+### Request logs are redacted
+
+The `/api/*` request logger wrote full request bodies to `paperr.log`, including plaintext passwords and PINs on login/register/settings calls. A new [`server/utils/redact.js`](server/utils/redact.js) strips exact-match secret fields (`password`, `pin`, `token`, `apiKey`, and their variants) before anything is logged — matched by full key name, not substring, so `max_tokens` and `is_pinned` survive untouched. Self-check at [`server/utils/redact.test.js`](server/utils/redact.test.js).
+
+### Clearer "server down" message
+
+Logging in while the server is unreachable used to surface as a generic failure. `AuthContext`'s response interceptor now fills in *"Cannot reach the paperr server — check that it is running"* whenever a request gets no response at all, so a stopped server reads differently from a wrong password.
+
+## Fixes
+
+- Re-running a one-click installer, or `npx paperr`, silently skipped the update on any existing install. This is the headline bug; all three gates above are the same fix.
+- `install/README.md` documented the old behaviour — *"the launcher rebuilds only when `client/dist` is missing, so delete it first if the UI looks stale"* — as a workaround. It no longer needs one.
+- The four `package.json` files had drifted apart: `npm/` was at `1.0.1-beta` while root, `client/` and `server/` were still on `1.0.0-beta`. All four now carry the release version.
+- "Building the app (first run only)" was never true after the first run and is now honest about when it runs.
+- Local chat and custom agents could 500 mid-conversation once the rendered prompt outgrew the model's KV cache — see "Chat no longer 500s" above.
+- Passwords, PINs, and tokens landed in `paperr.log` in plaintext on every login/register/settings request.
+- `install/uninstall-linux.sh` shipped without its executable bit, so the one-click installer zip couldn't run it directly.
+
+## Tests
+
+`scripts/launch.test.js` covers the stamp comparison — no stamp, matching stamp, moved HEAD, and not-a-clone — since deciding that wrong *is* the bug. The bootstrap's git paths were verified end to end against a local repo: a checkout stuck on an old commit pulls and runs the new one, a pull blocked by local changes warns and still launches, a zip copy with no `.git` starts, and a half-finished directory refuses.
+
+`server/ai/llmClient.contextfit.test.js`, `server/utils/redact.test.js`, and `server/routes/tasks.archive.test.js` are the same kind of self-check — `node <path>`, no framework — covering context trimming/truncation/clamping, secret-field redaction, and the archive/restore round trip respectively.
+
+## Dependencies
+
+- None added. Docker publishing uses only a `Dockerfile` and GitHub Actions workflow, no new npm packages; the rest of this release is Node built-ins throughout.
+
+## Known ceiling
+
+Updating from **Settings → Updates** leaves the launcher's stamp behind, so the next launch repeats an install and build that panel already did. The restart it triggers is wanted; the second build isn't. Marked in [`server/services/updateService.js`](server/services/updateService.js) and worth splitting only if that build ever costs more than it saves.
+
+The context-window estimate `fitContext` budgets against is chars ÷ 4, not a real tokenizer — close enough for gemma4-e2b's English-heavy prompts, but the knob to recalibrate (`CHARS_PER_TOKEN` in [`llmClient.js`](server/ai/llmClient.js)) is there if a future model's tokenizer runs denser.
+
+---
+
 # Release 1.0.1 — "Begonia"
 
 _2026-08-12_

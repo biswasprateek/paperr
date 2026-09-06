@@ -37,7 +37,7 @@ command -v python3 >/dev/null || missing="$missing python"
 
 if [ -n "$missing" ]; then
   echo "These are required to run paperr and are not installed yet:$missing"
-  echo "  node   - runs paperr itself (22.5+)"
+  echo "  node   - runs paperr itself (22.13+)"
   echo "  git    - downloads and updates it"
   echo "  python - powers the built-in AI server"
   echo
@@ -59,6 +59,17 @@ if [ -n "$missing" ]; then
   brew install $missing || exit 1
   echo
 fi
+
+# Deliberately outside the block above: that only runs when something was
+# missing, so an already-installed-but-ancient Node used to sail past every
+# check and fail later inside the app. paperr needs node:sqlite unflagged —
+# which 22.x only got in 22.13.
+node -e 'const [a,b]=process.versions.node.split(".").map(Number); process.exit(a > 22 || (a === 22 && b >= 13) ? 0 : 1)' 2>/dev/null || {
+  echo "paperr needs Node.js 22.13+, but this Mac has $(node -v 2>/dev/null || echo 'none')."
+  echo "Run 'brew upgrade node', or install a current one from the page opening now."
+  open https://nodejs.org/en/download
+  exit 1
+}
 
 # Only on a genuine first install: this file doubles as the launcher, and a
 # keypress before every start would be tiresome.

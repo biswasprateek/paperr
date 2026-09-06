@@ -70,4 +70,17 @@ async function apply({ force = false } = {}) {
   return { ...status, current: status.latest, updateAvailable: false, updated: true, restartRequired: true };
 }
 
-module.exports = { check, apply, plan };
+// One quiet check per server start, cached for any logged-in user to read —
+// the on-demand check() in the routes below stays admin-only since it hits
+// the network on every call; this is what the startup toast reads from.
+let lastCheck = null;
+
+async function checkOnBoot() {
+  try {
+    lastCheck = await check();
+  } catch {
+    lastCheck = null; // offline, not a git checkout, etc. — stay quiet
+  }
+}
+
+module.exports = { check, apply, plan, checkOnBoot, getLastCheck: () => lastCheck };

@@ -29,7 +29,7 @@ if [ ! -f "$PAPERR/scripts/uninstall.js" ]; then
   echo "    npm run uninstall"
   exit 1
 fi
-echo "Uninstalling paperr from $PAPERR Location."
+echo "Uninstalling paperr from $PAPERR Location..."
 echo "This stops the paperr server and removes its desktop entry."
 echo
 printf 'Press Enter to continue, or Ctrl+C to cancel... '

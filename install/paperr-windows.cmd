@@ -40,7 +40,7 @@ if defined NEED_PY set "MISSING=1"
 if not defined MISSING goto prereqs_ok
 
 echo These are required to run paperr and are not installed yet:
-if defined NEED_NODE echo    Node.js 22.5+ - runs paperr itself
+if defined NEED_NODE echo    Node.js 22.13+ - runs paperr itself
 if defined NEED_GIT  echo    Git           - downloads and updates it
 if defined NEED_PY   echo    Python 3      - powers the built-in AI server
 echo.
@@ -82,6 +82,19 @@ pause
 exit /b 0
 
 :prereqs_ok
+
+REM Deliberately after the block above: that only runs when something was
+REM missing, so an already-installed-but-ancient Node used to sail past every
+REM check and fail later inside the app. paperr needs node:sqlite unflagged —
+REM which 22.x only got in 22.13.
+node -e "const [a,b]=process.versions.node.split('.').map(Number);process.exit(a > 22 || (a === 22 && b >= 13) ? 0 : 1)" >nul 2>nul
+if errorlevel 1 (
+  echo paperr needs Node.js 22.13+, and this PC has an older version or none.
+  echo Install a current one from the page opening now, then run this file again.
+  start "" https://nodejs.org/en/download
+  pause
+  exit /b 1
+)
 
 REM Only on a genuine first install: this file doubles as the launcher, and a
 REM keypress before every start would be tiresome.

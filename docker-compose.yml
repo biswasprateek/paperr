@@ -1,0 +1,46 @@
+services:
+  paperr:
+    # Two published variants — swap the tag to switch:
+    #   :latest  includes paperrAi Server. amd64 only.
+    #   :slim    no paperrAi Server, half the size, also runs on arm64
+    #            (Raspberry Pi, Apple Silicon). Uncomment LLM_BASE_URL below to
+    #            point dotAi at an Ollama / LM Studio / any OpenAI-compatible
+    #            server you run yourself.
+    image: ghcr.io/biswasprateek/paperr:latest
+    build:
+      context: .
+      args:
+        # Match this to the tag above when building locally: 1 = latest, 0 = slim.
+        WITH_AI: 1
+    container_name: paperr
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      # Databases, uploads, backups, logs and the generated JWT secrets.
+      # Back this up and you've backed up paperr.
+      - paperr-data:/app/server/data
+    environment:
+      TZ: Etc/UTC
+      HOUSEHOLD_NAME: Our Home
+
+      # On :latest, dotAi runs on paperrAi Server — start it and import a
+      # model from Settings → AI Server. The download lands on the volume above,
+      # so budget a few GB.
+      #
+      # On :slim, or to use your own server instead, uncomment these. The
+      # default reaches an Ollama running on the Docker host.
+      # LLM_BASE_URL: http://host.docker.internal:11434
+      # LLM_MODEL: llama3
+      # LLM_API_KEY:
+
+      # Set these to keep sessions alive across a volume reset; otherwise a
+      # random pair is generated once and kept on the volume.
+      # JWT_SECRET:
+      # JWT_REFRESH_SECRET:
+    extra_hosts:
+      # Lets LLM_BASE_URL above resolve to the host on Linux too.
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  paperr-data:

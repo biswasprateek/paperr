@@ -29,9 +29,9 @@ First launch drops you into a **Setup Wizard** for your first space and admin ac
 
 ### Requirements
 
-- **Node.js 22.5+** — the server uses the built-in `node:sqlite` module
+- **Node.js 22.13+** — the server uses the built-in `node:sqlite` module unflagged, which 22.x only got in 22.13
 - **git** — used for the one-time clone
-- *(optional)* **Python 3** — auto-provisions paperr's bundled AI server; never blocks the install
+- *(optional)* **Python 3** — auto-provisions paperrAi Server; never blocks the install
 - *(optional)* **Ollama** or **LM Studio** — if you'd rather point the assistant at those
 
 Windows, macOS, and Linux.
@@ -55,7 +55,7 @@ Windows, macOS, and Linux.
 
 Chat to create, edit, and query tasks, projects, and events, and let **background agents** (Morning Brief, Reschedule Advisor, Priority Focus, Workload Spread, Bulletin Board — or your own custom ones) surface dismissable insight cards. Nothing an agent proposes is applied without your approval.
 
-The bundled AI server runs a small **Gemma E2B** model via `litert-lm` on **CPU alone, under 2GB of RAM**, uses a GPU when one is available, and auto-offloads when idle. Point `LLM_BASE_URL` at Ollama or LM Studio instead if you prefer.
+**paperrAi Server** runs a small **Gemma E2B** model on **CPU alone, under 2GB of RAM**, uses a GPU when one is available, and auto-offloads when idle. Point `LLM_BASE_URL` at Ollama or LM Studio instead if you prefer.
 
 ## Network access
 

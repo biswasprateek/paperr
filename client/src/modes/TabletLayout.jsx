@@ -16,6 +16,7 @@ import HeaderSearch from '../components/HeaderSearch';
 import NotificationsBell from '../components/NotificationsBell';
 import UserAvatar from '../components/UserAvatar';
 import SpacePicker from '../components/SpacePicker';
+import HostedAtBadge from '../components/HostedAtBadge';
 import EventForm from '../pages/calendar/EventForm';
 import CreateSpaceModal from '../pages/CreateSpaceModal';
 import ProjectFormModal from '../components/ProjectFormModal';
@@ -185,6 +186,8 @@ export default function TabletLayout({ children }) {
       <div className="fixed bottom-28 right-6 z-40">
         <QuickCreateButton variant="fab" />
       </div>
+
+      <HostedAtBadge />
 
       <ChatDrawer />
 

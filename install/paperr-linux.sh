@@ -37,7 +37,7 @@ command -v python3 >/dev/null || need_py=1
 
 if [ -n "$need_node$need_git$need_py" ]; then
   echo "These are required to run paperr and are not installed yet:"
-  [ -n "$need_node" ] && echo "  node   - runs paperr itself (22.5+)"
+  [ -n "$need_node" ] && echo "  node   - runs paperr itself (22.13+)"
   [ -n "$need_git" ]  && echo "  git    - downloads and updates it"
   [ -n "$need_py" ]   && echo "  python - powers the built-in AI server"
   echo
@@ -58,7 +58,7 @@ if [ -n "$need_node$need_git$need_py" ]; then
     py_pkg=python
   else
     echo "No apt/dnf/zypper/pacman here - install these yourself, then run this again:"
-    echo "  Node.js 22.5+ : https://nodejs.org/en/download"
+    echo "  Node.js 22.13+: https://nodejs.org/en/download"
     echo "  git, python3  : your distribution's package manager"
     exit 1
   fi
@@ -67,14 +67,17 @@ if [ -n "$need_node$need_git$need_py" ]; then
   # shellcheck disable=SC2086
   $install ${need_node:+nodejs npm} ${need_git:+git} ${need_py:+$py_pkg} || exit 1
   echo
-
-  # Distro Node is often years behind, and paperr needs node:sqlite from 22.5.
-  node -e 'process.exit(+process.versions.node.split(".")[0] >= 22 ? 0 : 1)' 2>/dev/null || {
-    echo "Node.js here is missing or older than paperr needs (22.5+)."
-    echo "Install a current one from https://nodejs.org/en/download, then run this again."
-    exit 1
-  }
 fi
+
+# Deliberately outside the block above: that only runs when something was
+# missing, so an already-installed-but-ancient Node used to sail past every
+# check and fail later inside the app. Distro Node is often years behind, and
+# paperr needs node:sqlite unflagged — which 22.x only got in 22.13.
+node -e 'const [a,b]=process.versions.node.split(".").map(Number); process.exit(a > 22 || (a === 22 && b >= 13) ? 0 : 1)' 2>/dev/null || {
+  echo "paperr needs Node.js 22.13+, but this machine has $(node -v 2>/dev/null || echo 'none')."
+  echo "Install a current one from https://nodejs.org/en/download, then run this again."
+  exit 1
+}
 
 # Only on a genuine first install: this file doubles as the launcher, and a
 # keypress before every start would be tiresome.

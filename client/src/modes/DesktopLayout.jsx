@@ -16,6 +16,7 @@ import HeaderSearch from '../components/HeaderSearch';
 import NotificationsBell from '../components/NotificationsBell';
 import UserAvatar from '../components/UserAvatar';
 import SpacePicker from '../components/SpacePicker';
+import HostedAtBadge from '../components/HostedAtBadge';
 import EventForm from '../pages/calendar/EventForm';
 import CreateSpaceModal from '../pages/CreateSpaceModal';
 import ProjectFormModal from '../components/ProjectFormModal';
@@ -247,6 +248,8 @@ export default function DesktopLayout({ children }) {
           </div>
         </main>
       </div>
+
+      <HostedAtBadge />
 
       {/* dotAi Chat Drawer */}
       <ChatDrawer />

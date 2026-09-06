@@ -309,6 +309,11 @@ export default function Settings() {
     Custom:     '',
   };
 
+  // Keys are the stored `provider` value — the server looks the built-in one up
+  // by name — so the rename to the label used everywhere else in the UI happens
+  // at render time only.
+  const PROVIDER_LABELS = { LiteRT: 'paperrAi Server' };
+
   const DEFAULT_FORM = {
     name: '', provider: 'Ollama',
     base_url: 'http://localhost:11434', api_key: '', model: 'llama3',
@@ -1698,7 +1703,7 @@ export default function Settings() {
                           : 'border-outline-variant text-on-surface-variant hover:bg-surface-container'
                       }`}
                     >
-                      {p}
+                      {PROVIDER_LABELS[p] || p}
                     </button>
                   ))}
                 </div>

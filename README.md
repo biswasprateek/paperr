@@ -10,7 +10,7 @@
 
 <p>
   <img alt="Local-first" src="https://img.shields.io/badge/local--first-100%25-e86343" />
-  <img alt="Node" src="https://img.shields.io/badge/node-22.5%2B-339933?logo=node.js&logoColor=white" />
+  <img alt="Node" src="https://img.shields.io/badge/node-22.13%2B-339933?logo=node.js&logoColor=white" />
   <img alt="React" src="https://img.shields.io/badge/react-18-61DAFB?logo=react&logoColor=black" />
   <img alt="SQLite" src="https://img.shields.io/badge/db-SQLite-003B57?logo=sqlite&logoColor=white" />
   <img alt="License" src="https://img.shields.io/badge/license-Apache%202.0-blue" />
@@ -18,6 +18,8 @@
 
 <p>
   <a href="#-quick-start"><b>Quick Start</b></a> ·
+  <a href="#-npx--one-command"><b>npx</b></a> ·
+  <a href="#-docker"><b>Docker</b></a> ·
   <a href="#-features"><b>Features</b></a> ·
   <a href="#-meet-dotai-your-ai-assistant"><b>dotAi</b></a> ·
   <a href="#-three-modes-one-app"><b>Modes</b></a> ·
@@ -37,7 +39,7 @@ A calendar app answers one question: *what's on today?* Real life is bigger than
 
 - 🆓 **Free** — no subscription, no AI credits caps, no "pro" tier. Clone it, run it, done.
 - 🔒 **Truly private** — runs on a machine you own; data lives in SQLite files on your machine. No accounts you don't control, no telemetry, no cloud. It never leaves your walls.
-- 🤖 **Local, private AI** — dotAi runs on paperr's **bundled AI server** (based on LiteRT): a small, efficient **Gemma E2B** model that installs itself on `npm install` and runs on **CPU alone, under 2GB of RAM** — the laptop or Mac you already have, no GPU or special hardware needed. It auto-offloads from memory when idle, so it costs you nothing while you're not using it. Or bring your own Ollama / LM Studio. Your tasks and projects are read and edited by a model on **your** hardware — nothing is sent to anyone else's servers unless you deliberately point it at a cloud provider.
+- 🤖 **Local, private AI** — dotAi runs on **paperrAi Server**, paperr's own built-in model server: a small, efficient **Gemma E2B** model that installs itself on `npm install` and runs on **CPU alone, under 2GB of RAM** — the laptop or Mac you already have, no GPU or special hardware needed. It auto-offloads from memory when idle, so it costs you nothing while you're not using it. Or bring your own Ollama / LM Studio. Your tasks and projects are read and edited by a model on **your** hardware — nothing is sent to anyone else's servers unless you deliberately point it at a cloud provider.
 - 🗓️ **Not just a digital calendar** — tasks, projects, lists, notebooks, routines, focus & wellness apps, a photo Frame, and a shared Hub, all in one place and all talking to each other.
 - 🏠 **Built for a household _or_ a team** — create **Spaces** (Family or Team) with their own members, areas, and data.
 - 🌐 **One install for the whole family or team** — set paperr up once on a single machine on your network, and everyone signs in from their own phone, laptop, or tablet — no per-device install, no per-person subscription.
@@ -74,7 +76,7 @@ Organize life into separate **Spaces** — a *Family* space for home, a *Team* s
 <details>
 <summary>More on Spaces & accounts</summary>
 
-Self-service **registration** (with optional quick-login PIN and avatar) and a **Browse Spaces** screen let people discover and request to join a space, with admin approval. Notebooks, Projects, Lists, and Custom Agents are **private to their creator by default**, with a one-tap toggle to share them with the whole space. Space admins can permanently delete a space (type-to-confirm) from the Edit Space screen. New spaces end with an optional "Set up your apps" step to enable the bundled AI server and add curated Frame photo and Good Thoughts collections. Every new space is seeded with type-appropriate starter lists, a starter routine, and a "Welcome to Paperr" onboarding project that tours the app.
+Self-service **registration** (with optional quick-login PIN and avatar) and a **Browse Spaces** screen let people discover and request to join a space, with admin approval. Notebooks, Projects, Lists, and Custom Agents are **private to their creator by default**, with a one-tap toggle to share them with the whole space. Space admins can permanently delete a space (type-to-confirm) from the Edit Space screen. New spaces end with an optional "Set up your apps" step to enable paperrAi Server and add curated Frame photo and Good Thoughts collections. Every new space is seeded with type-appropriate starter lists, a starter routine, and a "Welcome to Paperr" onboarding project that tours the app.
 
 </details>
 
@@ -87,6 +89,7 @@ The heart of paperr. Create, assign, schedule, and complete tasks with:
 - Due dates *and* explicit start/end time blocks that show up on the Calendar
 - Recurrence, including specific weekdays
 - **Today** and **Overdue** smart views, assignment across household/team members, drag-and-drop organization and bulk actions
+- **Archive** a task to hide it from every list, board, and calendar without deleting it — find it again (and restore it, individually or in bulk) from the dedicated Archived filter
 - A little confetti/emoji/toast celebration when a task or habit gets completed — tune individual effects down or off in Settings → Motion
 
 ### 🎯 Deep Work Mode
@@ -216,11 +219,58 @@ The mode is auto-detected from screen size and touch support on first load, reme
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### ⚡ npx — one command
 
-- **Node.js 22.5+** (the server uses the built-in `node:sqlite` module, which needs 22.5 or later)
-- *(Optional)* **Python 3** — lets `npm install` auto-provision paperr's own [bundled AI server](#why-paperr). Skipped safely if Python isn't found; add it later and re-run `npm install` in `server/` to enable it.
-- *(Optional)* **Ollama** or **LM Studio** — external local LLM providers, if you'd rather point dotAi at one of those instead of the bundled server
+If you already have **Node 22.13+**, this is the whole install:
+
+```bash
+npx paperr              # clones into ./paperr, installs, builds, starts, opens it
+npx paperr my-dir       # ...into ./my-dir instead
+npx paperr --dev        # dev servers (API :3000, client :5173)
+```
+
+Re-run it any time to update and start — an existing checkout is pulled forward, not re-cloned. It provisions paperrAi Server too, if Python 3 is on your machine.
+
+### 🐳 Docker
+
+Nothing to install but Docker itself — no Node, no Python.
+
+```bash
+curl -O https://raw.githubusercontent.com/biswasprateek/paperr/main/docker-compose.yml
+docker compose up -d
+```
+
+Then open **`http://<your-machine-ip>:3000`** and the Setup Wizard takes it from there.
+
+Two images are published, both self-contained:
+
+| Tag | paperrAi Server | Platforms | Size |
+| --- | --- | --- | --- |
+| `:latest` | ✅ included | `linux/amd64` | ~1.2 GB |
+| `:slim` | ❌ — set `LLM_BASE_URL` to your own | `linux/amd64`, `linux/arm64` | ~660 MB |
+
+Use **`:slim`** on a Raspberry Pi or Apple Silicon: paperrAi Server's native library is x86_64-only, so it can't ship for `arm64`. Point `LLM_BASE_URL` at an Ollama or LM Studio you already run — `docker-compose.yml` has the line ready to uncomment, pre-set to reach the Docker host.
+
+Everything that persists — databases, uploads, backups, logs, downloaded models, and auto-generated JWT secrets — lives in the single `paperr-data` volume at `/app/server/data`. Back that up and you've backed up paperr.
+
+<details>
+<summary>Configuration, and building it yourself</summary>
+
+Every variable in [Configuration](#-configuration) works as a compose `environment:` entry. `JWT_SECRET` / `JWT_REFRESH_SECRET` are generated on first run and kept on the volume, so logins survive a container recreate; set them explicitly and yours win.
+
+On `:latest`, start paperrAi Server and import a model from **Settings → paperrAi Server**. The download lands on the volume, so leave a few GB free.
+
+To build from a clone instead of pulling, `docker compose up -d --build`. The `WITH_AI` build arg picks the variant — `1` for `:latest`, `0` for `:slim`.
+
+</details>
+
+### Prerequisites (running from source)
+
+Not needed if you used npx or Docker above.
+
+- **Node.js 22.13+** (the server uses the built-in `node:sqlite` module unflagged, which 22.x only got in 22.13 — earlier 22.x will not start)
+- *(Optional)* **Python 3** — lets `npm install` auto-provision [paperrAi Server](#why-paperr). Skipped safely if Python isn't found; add it later and re-run `npm install` in `server/` to enable it.
+- *(Optional)* **Ollama** or **LM Studio** — external local LLM providers, if you'd rather point dotAi at one of those instead of paperrAi Server
 
 ### Install & run (development)
 
@@ -233,7 +283,7 @@ npm run dev              # starts API (:3000) and client (:5173) together
 
 > 🔐 `npm run install:all` creates `server/.env` from `.env.example` (if it doesn't already exist) and auto-generates real random values for `JWT_SECRET` / `JWT_REFRESH_SECRET` — no manual copy/paste step needed. It never overwrites secrets you've already set. To (re-)run just that step: `npm run setup:env`.
 
-> 🤖 **Bundled AI Server, installs itself:** `npm run install:all` (which runs `npm install` inside `server/`) automatically provisions paperr's own local AI model via `litert-lm` — see [Why paperr](#why-paperr) for what it runs on. It looks for a Python interpreter on your machine to build a project-local virtual environment (`server/ai/litert/venv`):
+> 🤖 **paperrAi Server installs itself:** `npm run install:all` (which runs `npm install` inside `server/`) automatically provisions paperr's own local AI model — see [Why paperr](#why-paperr) for what it runs on. It looks for a Python interpreter on your machine to build a project-local virtual environment (`server/ai/litert/venv`):
 >
 > | Platform | Looks for                    |
 > | -------- | ---------------------------- |
@@ -241,7 +291,7 @@ npm run dev              # starts API (:3000) and client (:5173) together
 > | macOS    | `python3`, then `python` |
 > | Linux    | `python3`, then `python` |
 >
-> If no Python interpreter is found, this step is skipped with a warning and the rest of the install continues normally — install Python 3 and re-run `npm install` in `server/` to enable it later, or use Ollama/LM Studio instead (see Configuration below). Once installed, manage the server (start/stop, live memory usage, auto-offload when idle, model picker, downloading additional models) from **Settings → paperr AI Server**.
+> If no Python interpreter is found, this step is skipped with a warning and the rest of the install continues normally — install Python 3 and re-run `npm install` in `server/` to enable it later, or use Ollama/LM Studio instead (see Configuration below). Once installed, manage the server (start/stop, live memory usage, auto-offload when idle, model picker, downloading additional models) from **Settings → paperrAi Server**.
 
 On first launch, the **Setup Wizard** walks you through creating your first space and admin account.
 
@@ -277,13 +327,18 @@ Then open **`http://<your-machine-ip>:3000`** from any device on your network.
 
 For non-technical users, one downloadable file does the whole thing:
 
-| OS      | File                                                            | First run                                            |
-| ------- | --------------------------------------------------------------- | ---------------------------------------------------- |
-| Windows | [`install/paperr-windows.cmd`](install/paperr-windows.cmd)   | SmartScreen may warn — **More info → Run anyway** |
-| macOS   | [`install/paperr-macos.command`](install/paperr-macos.command) | `chmod +x` it, then right-click → **Open**        |
-| Linux   | [`install/paperr-linux.sh`](install/paperr-linux.sh)         | `chmod +x` it                                        |
+| OS      | Download                                                                                        | First run                                                        |
+| ------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| Windows | [paperr-windows.zip](https://github.com/biswasprateek/paperr/releases/latest/download/paperr-windows.zip) | Unzip, run `paperr-windows.cmd` — SmartScreen may warn, **More info → Run anyway** |
+| macOS   | [paperr-macos.zip](https://github.com/biswasprateek/paperr/releases/latest/download/paperr-macos.zip)     | Unzip, right-click `paperr-macos.command` → **Open** (already executable) |
+| Linux   | [paperr-linux.zip](https://github.com/biswasprateek/paperr/releases/latest/download/paperr-linux.zip)     | Unzip, run `paperr-linux.sh` (already executable)                   |
 
-**Nothing to install first.** The file checks for **Node 22.5+**, **git**, and **Python 3** (for the bundled AI server, which never blocks the install), lists whatever's missing, and installs it for you after a keypress — winget on Windows, Homebrew on macOS, apt/dnf/zypper/pacman on Linux — falling back to download links where none of those exist. It then confirms once before a first install, clones paperr to `~/paperr` (`%USERPROFILE%\paperr` on Windows), installs dependencies, generates `server/.env`, builds the client, starts the server on `:3000`, and opens the app. Every run after that just starts it.
+Shipped as zips rather than raw files because Chrome/Edge block bare `.cmd` /
+`.command` / `.sh` downloads outright as a dangerous file type — see
+[`install/README.md`](install/README.md) for why, and for the direct repo
+links if you'd rather skip the zip.
+
+**Nothing to install first.** The file checks for **Node 22.13+**, **git**, and **Python 3** (for paperrAi Server, which never blocks the install), lists whatever's missing, and installs it for you after a keypress — winget on Windows, Homebrew on macOS, apt/dnf/zypper/pacman on Linux — falling back to download links where none of those exist. It then confirms once before a first install, clones paperr to `~/paperr` (`%USERPROFILE%\paperr` on Windows), installs dependencies, generates `server/.env`, builds the client, starts the server on `:3000`, and opens the app. Every run after that just starts it.
 
 **Everyday use:** the installer adds a desktop shortcut plus an app-menu entry (Start Menu / `~/Applications/paperr.app` / `.desktop`). Clicking it starts the server if it isn't already running, then opens paperr in a chromeless Chrome/Edge window — an app window with its own icon and taskbar entry. No Electron, no bundled browser, nothing installed system-wide, and **no code signing on any platform** — which is exactly why Windows shows the SmartScreen prompt the first time. Without a Chromium-family browser it falls back to a normal tab in your default one.
 
@@ -337,6 +392,7 @@ paperr is built private-first, with real auth baked in:
 - **Brute-force protection** — accounts lock after repeated failed attempts
 - **Role-based access** — admin vs. member, enforced server-side
 - **Session management** and a full **audit log** of sensitive actions
+- **Redacted request logs** — passwords, PINs, and tokens are stripped before anything touches the log file
 
 ---
 
@@ -344,7 +400,7 @@ paperr is built private-first, with real auth baked in:
 
 | Layer                                    | Technology                                                                                                                                                     |
 | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Runtime**                        | Node.js 22.5+ (needs the built-in`node:sqlite` module)                                                                                                       |
+| **Runtime**                        | Node.js 22.13+ (needs the built-in`node:sqlite` module)                                                                                                      |
 | **API**                            | Express.js                                                                                                                                                     |
 | **Database**                       | SQLite via Node's built-in`node:sqlite` (single file, zero config, no native build step)                                                                     |
 | **Auth**                           | JWT (HTTP-only cookies) + bcrypt (`bcryptjs`)                                                                                                                |
@@ -355,7 +411,7 @@ paperr is built private-first, with real auth baked in:
 | **Styling**                        | Tailwind CSS                                                                                                                                                   |
 | **Editors / Charts / DnD / Dates** | `@uiw/react-md-editor` · Recharts · @dnd-kit · date-fns                                                                                                   |
 | **Font / Icons**                   | Plus Jakarta Sans · Material Symbols ·`emoji-picker-react`                                                                                                 |
-| **AI**                             | Any OpenAI-compatible local LLM (Ollama, LM Studio, llama.cpp) + a bundled`litert-lm` server paperr installs and supervises itself (Windows / macOS / Linux) |
+| **AI**                             | **paperrAi Server** — a local model server paperr installs and supervises itself (Windows / macOS / Linux) — or any OpenAI-compatible LLM (Ollama, LM Studio, llama.cpp) |
 | **Images**                         | `sharp` — downscales/recompresses curated Frame art server-side to match browser-uploaded photos                                                            |
 
 ### Project layout
@@ -364,10 +420,10 @@ paperr is built private-first, with real auth baked in:
 paperr/
 ├── server/        Express API — routes, auth, SQLite, AI tools & agents
 │   ├── routes/    tasks, lists, projects, calendar, notes, routines, spaces, agents, backups, …
-│   ├── ai/        dotAi's LLM client, tool definitions, handler, scheduler, built-in agents, bundled AI server supervisor
+│   ├── ai/        dotAi's LLM client, tool definitions, handler, scheduler, built-in agents, paperrAi Server supervisor
 │   ├── services/  backups, notifications, and other cross-route business logic
 │   ├── data/      hand-curated starter content (Frame photo sets, Good Thoughts collections)
-│   ├── scripts/   postinstall setup (auto-provisions the bundled AI server's Python venv)
+│   ├── scripts/   postinstall setup (auto-provisions paperrAi Server's Python venv)
 │   └── db/        schema.sql + node:sqlite setup
 ├── client/        React + Vite app
 │   └── src/
