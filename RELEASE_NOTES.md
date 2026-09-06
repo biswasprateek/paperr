@@ -1,6 +1,6 @@
 # Release 1.0.2 — "Carnation"
 
-_2026-08-13 (updated 2026-09-05)_
+_2026-09-05_
 
 A repair release for the one thing 1.0.1 got wrong: installing an update. Everything shipped since 1.0.1 was on npm and on git, and existing installs kept starting the version they were first cloned at — no error, no sign anything had happened. Re-running an installer now genuinely updates the copy it finds, and the launcher notices when the checkout has moved.
 
@@ -106,10 +106,10 @@ Delivery goes through npm rather than a direct download of the bootstrap, so eve
 
 Installing creates **two** entries, not one, on every platform (Desktop + Start Menu on Windows, `~/Applications/*.app` on macOS, `.desktop` files on Linux):
 
-| Shortcut            | Runs                                                                 |
-| ------------------- | -------------------------------------------------------------------- |
-| `paperr`            | The dev servers (API `:3000`, client `:5173`) — for working on the code |
-| `paperr LAN Server` | The production build, reachable by other devices on the network        |
+| Shortcut              | Runs                                                                        |
+| --------------------- | --------------------------------------------------------------------------- |
+| `paperr`            | The dev servers (API`:3000`, client `:5173`) — for working on the code |
+| `paperr LAN Server` | The production build, reachable by other devices on the network             |
 
 Both point at the same install and differ only in how they start the server, and whichever one you run creates both — so the one you've never clicked still shows up. Only `paperr LAN Server` prints a network address; the dev shortcut is localhost-only. The list lives in one place in [`scripts/launch.js`](scripts/launch.js) and is shared by all three platform builders and the uninstaller, so the two can't drift apart.
 

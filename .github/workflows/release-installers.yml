@@ -48,6 +48,18 @@ jobs:
         with:
           ref: ${{ steps.tag.outputs.tag }}
 
+      # Contributors on Windows can't set the Unix executable bit, and
+      # `core.filemode=false` there means any content edit + `git add` of
+      # these scripts silently resets the bit to 644 on commit. Re-assert it
+      # here (only in the CI checkout's index, not pushed anywhere) so a
+      # release doesn't depend on remembering to chmod before tagging.
+      - name: Ensure executable bit on Unix installer scripts
+        run: |
+          set -euo pipefail
+          git update-index --chmod=+x \
+            install/paperr-macos.command install/uninstall-macos.command \
+            install/paperr-linux.sh install/uninstall-linux.sh
+
       - name: Build installer zips
         run: |
           set -euo pipefail
